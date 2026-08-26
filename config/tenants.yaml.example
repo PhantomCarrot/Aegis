@@ -1,0 +1,61 @@
+# Copy to tenants.yaml (not committed, see .gitignore) — zero real data
+# here, only generic examples. See docs/multi-tenant.md.
+#
+# The file is reloaded automatically (mtime comparison): no need to
+# restart the backend after an edit.
+
+default_tenant: demo
+
+tenants:
+  demo:
+    name: "Demo"
+    # exec.mode absent → inherits defaults.exec.mode (see global.yaml)
+    kubeconfig_dir: "~/.kube/aegis/demo"
+    tools_enabled: [kubectl, argocd, cloud_cli, run_command]
+    domain_notes: "" # free-form — naming conventions, reminders specific to this tenant
+
+  # Second example illustrating multi-tenancy and remote execution:
+  # acme-corp:
+  #   name: "Acme Corp"
+  #   ollama:
+  #     url: "http://ollama.acme.internal:11434"
+  #   exec:
+  #     mode: ssh
+  #     ssh:
+  #       host: "10.x.x.x"
+  #       user: "opsagent"
+  #       port: 22
+  #       key_path: "~/.ssh/aegis_acme-corp"
+  #       # certificate_path: "~/.ssh/aegis_acme-corp-cert.pub"  # optional — for
+  #       #   short-lived certificate auth (Azure AD `az ssh config`, Vault SSH
+  #       #   secrets engine) instead of a static key, see docs/execution-model.md
+  #       known_hosts_path: "~/.ssh/aegis_acme-corp_known_hosts"  # recommended, see docs/execution-model.md
+  #   kubeconfig_dir: "~/.kube/aegis/acme-corp"
+  #   tools_enabled: [kubectl, argocd, run_command]
+
+  # Third example illustrating an alternate LLM provider — see
+  # docs/llm-providers.md. llm.provider defaults to "ollama" (using
+  # ollama.url above) when absent; ollama.url still applies regardless of
+  # llm.provider, since RAG embeddings always go through Ollama.
+  # lmstudio-tenant:
+  #   name: "LM Studio"
+  #   llm:
+  #     provider: lmstudio
+  #     lmstudio:
+  #       url: "http://localhost:1234"  # `lms server start`, or the app's own "Local Server" tab
+  #   tools_enabled: [kubectl, run_command]
+
+  # Fourth example — an in-process Hugging Face model via AirLLM, no
+  # server involved. Needs the optional `airllm` extra installed
+  # (`uv sync --extra airllm` in backend/) and has no native tool-calling
+  # (Aegis prompts the model itself to keep tools working — see
+  # docs/llm-providers.md for how and its limits).
+  # airllm-tenant:
+  #   name: "AirLLM"
+  #   llm:
+  #     provider: airllm
+  #     airllm:
+  #       model: "meta-llama/Llama-3.2-3B-Instruct"  # HF repo id or local path
+  #       device: "cpu"                                # or "cuda:0", etc.
+  #       # compression: "4bit"                         # optional, needs bitsandbytes
+  #   tools_enabled: [kubectl, run_command]

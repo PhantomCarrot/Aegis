@@ -1,0 +1,26 @@
+# Real config — never committed, only the .example files are
+/config/global.yaml
+/config/tenants.yaml
+.env
+.env.local
+
+# Backend (Python)
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+*.pyc
+
+# Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+
+# Data
+qdrant_storage/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/

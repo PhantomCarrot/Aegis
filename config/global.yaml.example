@@ -1,0 +1,9 @@
+# Copy to global.yaml (not committed, optional — absent = Python defaults).
+# Installation-wide defaults, overridable field by field by each tenant in
+# tenants.yaml — see docs/multi-tenant.md.
+
+ollama:
+  url: "http://localhost:11434"
+
+exec:
+  mode: local # local | ssh — see docs/execution-model.md
