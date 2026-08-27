@@ -77,7 +77,7 @@ Every doc opens with a short "what this is / why it exists" before the detail �
 
 | Doc | Covers |
 |---|---|
-| [`docs/architecture.md`](docs/architecture.md) | System overview, the frontend/backend split, network auth, milestone-by-milestone status |
+| [`docs/architecture.md`](docs/architecture.md) | System overview, the frontend/backend split, network auth, backend/frontend module layout |
 | [`docs/multi-tenant.md`](docs/multi-tenant.md) | The tenant model, config format, hot-reload, how the active tenant is resolved per request |
 | [`docs/llm-providers.md`](docs/llm-providers.md) | Ollama, LM Studio, and AirLLM as chat backends — per-tenant, with AirLLM's prompted tool-calling explained |
 | [`docs/security-model.md`](docs/security-model.md) | Safety modes, guardrail classification, the confirmation flow, secret anonymization, audit logging |
@@ -88,11 +88,9 @@ Every doc opens with a short "what this is / why it exists" before the detail �
 | [`docs/deployment.md`](docs/deployment.md) | Exposing the backend (Cloudflare Tunnel) and deploying the frontend (Vercel) |
 | [`docs/adr/`](docs/adr/) | Architecture Decision Records — the why behind the bigger calls |
 
-## Project status
+## Known gaps
 
-V1 scope complete: conversational agent + infra tools, confirmation flow, multi-tenant, RAG, hardening. Rewritten from an internal single-tenant tool, milestone by milestone — see the "Current status" section of [`docs/architecture.md`](docs/architecture.md) for the full breakdown and [`docs/adr/`](docs/adr/) for the decisions behind it.
-
-Deferred to a later pass (tracked in [`docs/rag.md`](docs/rag.md#deferred-v11) and [`docs/architecture.md`](docs/architecture.md)): hybrid search + reranking, a Terraform scraper, object storage / Kafka / observability tools, CI/CD tools.
+Dense-only RAG search (no hybrid search or reranking yet), kubectl is the only RAG source (no Terraform scraper or LLM-narrated docs), and no object storage / streaming / observability / CI-CD tools yet — see [`docs/rag.md`](docs/rag.md#not-yet-implemented) for the full list. [`docs/adr/`](docs/adr/) has the reasoning behind the bigger design calls (why a Python backend + Next.js frontend, why the confirmation flow rides on the AI SDK's native approval mechanism, ...).
 
 ## Contributing
 

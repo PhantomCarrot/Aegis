@@ -15,7 +15,7 @@ Three providers today:
 ```yaml
 tenants:
   demo:
-    # llm.provider absent → "ollama", using ollama.url below (same as today)
+    # llm.provider absent → defaults to "ollama", using ollama.url below
     ollama:
       url: "http://localhost:11434"
 
@@ -39,11 +39,11 @@ tenants:
 
 ## Ollama
 
-Unchanged from before this feature existed — `ollama.url`, `POST /api/chat`, streaming, native tool-calling. See [`multi-tenant.md`](multi-tenant.md).
+The default provider: `tenant.ollama.url`, `POST /api/chat`, streaming responses, native tool-calling. Just needs a reachable Ollama instance, local or remote — see [`multi-tenant.md`](multi-tenant.md) for how tenant config resolves.
 
 ## LM Studio
 
-Start its local server first — `lms server start` (the CLI that ships with the app) or the app's own "Local Server" tab — then load a tool-calling-capable model (`lms load <model>`, or through the UI). Verified live against a real server for model discovery (`GET /v1/models`) and the chat-completions error path; the streaming + tool-call path is implemented against LM Studio's documented OpenAI-compatible contract (https://lmstudio.ai/docs/developer) but wasn't independently re-verified end to end for lack of a tool-calling model loaded at the time this was built.
+Start its local server first — `lms server start` (the CLI that ships with the app) or the app's own "Local Server" tab — then load a tool-calling-capable model (`lms load <model>`, or through the UI). Model discovery (`GET /v1/models`) and the chat-completions error path are exercised against a real server; the streaming + tool-call path is implemented against LM Studio's documented OpenAI-compatible contract (https://lmstudio.ai/docs/developer) but hasn't been independently verified end to end against a live tool-calling model — load one and try a tool-using prompt before relying on this in production.
 
 Implementation note: LM Studio speaks OpenAI's chat-completions shape, which differs from Aegis's internal message format (the same one Ollama's `/api/chat` already expects) in two ways the provider translates on the way in and out:
 - Tool call arguments stream as incremental JSON-string *fragments* across many chunks (keyed by array `index`), not one shot per call the way Ollama sends them — `app/stream/lmstudio_provider.py` accumulates them per index and parses once the turn's `finish_reason` arrives.
@@ -71,14 +71,14 @@ This is inherently less reliable than a model's own native tool-calling: it depe
 Model loading is cached in-process per `(model, device, compression)` — the whole reason AirLLM exists is to make loading a huge checkpoint bearable, so it's kept warm for the life of the backend process rather than reloaded on every turn. The first request against a given model pays the loading cost; later ones don't.
 
 **Known gaps, not yet exercised end to end:**
-- Not live-tested against a real model download in building this — the tag-scanning logic is unit-tested against synthetic text streams (`backend/tests/test_airllm_provider.py`), but a real generation run wasn't performed.
-- Apple Silicon: `AutoModel.from_pretrained()` auto-dispatches to an MLX-backed implementation on macOS, which needs airllm's separate `mlx` extra — untested here.
+- Not tested against a real model download — the tag-scanning logic is unit-tested against synthetic text streams (`backend/tests/test_airllm_provider.py`), but an actual generation run hasn't been performed.
+- Apple Silicon: `AutoModel.from_pretrained()` auto-dispatches to an MLX-backed implementation on macOS, which needs AirLLM's separate `mlx` extra — untested here.
 - `device` accepts anything `transformers`/`torch` understand (`"cpu"`, `"cuda:0"`, ...); `"cpu"` is the safe default across machines but slow for anything beyond a small model.
 
 ## Choosing a model to actually run
 
 `GET /api/llm/models` is provider-aware:
-- `ollama` / `lmstudio`: queries the provider's live models endpoint (`/api/tags`, `/v1/models`) — same as before this feature, now generalized.
+- `ollama` / `lmstudio`: queries the provider's live models endpoint (`/api/tags`, `/v1/models`).
 - `airllm`: returns the single model fixed in `llm.airllm.model` — there's nothing to discover at runtime, loading a different one on demand isn't a "pick from a dropdown" kind of operation given the cost.
 
 The frontend's model selector (`ModelSelector.tsx`, in the Settings sidebar) reflects this — a real dropdown for Ollama/LM Studio, a fixed label for AirLLM.

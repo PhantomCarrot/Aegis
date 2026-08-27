@@ -6,12 +6,12 @@ The frontend consumes the chat via `useChat` (`@ai-sdk/react`), which expects an
 
 ## How the format was verified
 
-Not by reading the online docs (the explicit risk flagged during planning): by installing `ai`/`@ai-sdk/react` in `frontend/` and reading `node_modules/ai/dist/index.js` directly — the actual implementation, not a description. Versions verified: `ai@7.0.79`, `@ai-sdk/react@4.0.82`.
+Not by reading the online docs, which can drift from the actual shipped behavior: by installing `ai`/`@ai-sdk/react` in `frontend/` and reading `node_modules/ai/dist/index.js` directly — the real implementation, not a description of it. Versions verified: `ai@7.0.79`, `@ai-sdk/react@4.0.82`.
 
-Two discoveries changed the implementation from what was assumed at the start:
+Two things worth knowing if you're touching this code:
 
 1. **The client is strict about `text-start`/`text-end`**: a `text-delta` without a prior `text-start` for the same `id` throws (`"Ensure a text-start chunk is sent before any text-delta chunks"`, verified in the source). The encoder therefore can't be a stateless 1:1 mapping for text — see `TextStart`/`TextEnd` in `app/agent/events.py` and their emission in `app/agent/loop.py`.
-2. **There's a native tool approval mechanism** (`tool-approval-request` / `tool-approval-response`, types `ToolApprovalRequestOutput`/`ToolApprovalResponseOutput`) — no need to invent a custom confirmation flow on top of the protocol as originally planned. M3's plan was updated accordingly (see ADR 0002).
+2. **There's a native tool approval mechanism** (`tool-approval-request` / `tool-approval-response`, types `ToolApprovalRequestOutput`/`ToolApprovalResponseOutput`) — Aegis's confirmation flow rides on top of this instead of inventing its own protocol; see [ADR 0002](adr/0002-native-tool-approval-instead-of-custom-confirmation.md) for why.
 
 ## Confirmed format
 
@@ -77,6 +77,6 @@ sequenceDiagram
 - `app/stream/aisdk_protocol.py` — the **only** file that translates `AgentEvent` → SSE JSON. If the AI SDK protocol changes, this is the only place to touch.
 - Tests: `backend/tests/test_aisdk_protocol.py` (exact format, isolated) and `backend/tests/test_chat_router.py` (end to end with a fake Ollama provider, no dependency on a real Ollama).
 
-## Known limitation (V1)
+## Known limitation
 
-The history sent to the LLM between two HTTP turns doesn't reconstruct already-resolved `dynamic-tool` parts (`state: "output-available"`) from previous turns — only the assistant's text about them is kept (see `_extract_text`, `app/routers/chat.py`). M3 added a special case, not full reconstruction: `_find_pending_approval` inspects the history for a part in `"approval-responded"` state (a confirmation that was just resolved) and executes it, but a tool result already shown earlier in the conversation isn't re-fed to the LLM as structured context on later turns. In practice, the LLM keeps the text it wrote about it itself, which covers most exchanges but can lose detail over a long history. No dedicated milestone planned for full reconstruction — to do if the need is confirmed in practice.
+The history sent to the LLM between two HTTP turns doesn't reconstruct already-resolved `dynamic-tool` parts (`state: "output-available"`) from previous turns — only the assistant's text about them is kept (see `_extract_text`, `app/routers/chat.py`). There's a narrower special case for the confirmation flow specifically: `_find_pending_approval` inspects the history for a part in `"approval-responded"` state (a confirmation that was just resolved) and executes it — but a tool result already shown earlier in the conversation isn't re-fed to the LLM as structured context on later turns. In practice, the LLM keeps the text it wrote about it itself, which covers most exchanges but can lose detail over a long history. Full reconstruction isn't implemented — worth doing if this turns out to matter in practice.

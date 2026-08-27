@@ -51,4 +51,4 @@ AEGIS_ALLOWED_ORIGINS=https://your-project.vercel.app
 
 ## Alternatives to Cloudflare Tunnel
 
-If you'd rather avoid a Cloudflare account: a self-hosted reverse tunnel (`frp`, `rathole`) to a small VPS you control also works — same principle (outbound connection, no inbound port), just more pieces to operate yourself. Not documented here in detail, out of V1 scope.
+If you'd rather avoid a Cloudflare account: a self-hosted reverse tunnel (`frp`, `rathole`) to a small VPS you control also works — same principle (outbound connection, no inbound port), just more pieces to operate yourself. Not documented here in detail — set up your own tunnel service and point `AEGIS_BACKEND_URL` at it.

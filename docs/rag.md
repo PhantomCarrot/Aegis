@@ -24,7 +24,7 @@ flowchart LR
     end
 ```
 
-1. **Generation** (`app/rag/docs_gen.py`): scrapes kubectl (namespaces, pods, deployments, services) on the active tenant's cluster, produces a Markdown document. V1 is limited to kubectl — no Terraform or LLM narrative generation (deferred to V1.1, see the plan).
+1. **Generation** (`app/rag/docs_gen.py`): scrapes kubectl (namespaces, pods, deployments, services) on the active tenant's cluster, produces a Markdown document. Kubectl is the only source today — no Terraform or LLM narrative generation yet (see [below](#not-yet-implemented)).
 2. **Chunking** (`app/rag/chunking.py`): splits by heading structure rather than a blind sliding window — each chunk is prefixed with its "breadcrumb" (e.g. `Cluster > Pods`) so the hierarchical context isn't lost once isolated.
 3. **Embeddings** (`app/rag/embeddings.py`): 100% local via Ollama (`POST /api/embed`), `nomic-embed-text` model by default (768 dimensions). This is independent of `tenant.llm.provider` — RAG embeddings always go through Ollama, even for a tenant whose chat LLM is LM Studio or AirLLM, since neither of those exposes an embeddings endpoint. `tenant.ollama.url` still needs to point at a real Ollama instance in that case; see [`llm-providers.md`](llm-providers.md#what-this-is) for the full split.
 4. **Storage** (`app/rag/store.py`): one Qdrant collection per tenant (`aegis_{tenant_id}`) — hard isolation, no shared `tenant_id` filter that could leak on a bug. Deterministic point IDs (UUID5 derived from tenant+source+chunk index): re-indexing a source cleanly overwrites its old chunks without duplicating them. `QDRANT_URL` isn't limited to the local container the docker-compose quickstart bundles — point it at any reachable Qdrant, including a managed/remote instance (e.g. Qdrant Cloud), and set `QDRANT_API_KEY` if that instance requires one.
@@ -57,8 +57,8 @@ Question: *"How many namespaces are there according to the indexed docs?"*
 
 The "Namespaces" chunk comes out with the best score for a question about namespaces — semantic search works as expected (verified under real conditions, not just in tests).
 
-## Deferred (V1.1)
+## Not yet implemented
 
-- **Local hybrid search + reranking** (dense+sparse via Qdrant + `fastembed`, no API/torch dependency) — V1 stays with simple dense search.
+- **Local hybrid search + reranking** (dense+sparse via Qdrant + `fastembed`, no API/torch dependency) — search is dense-only today.
 - **Terraform scraper** + LLM narrative doc generation.
 - **Local sources** (indexing existing Markdown files alongside the auto-generated docs).

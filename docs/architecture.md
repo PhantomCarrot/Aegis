@@ -24,20 +24,24 @@ The teal arrows between the agent loop and Qdrant are unnumbered on purpose: the
 Since the backend is potentially reachable from the internet (frontend hosted on Vercel), two independent layers protect it:
 
 1. **Transport**: the backend never opens a public port directly — it exposes itself via an outgoing tunnel (Cloudflare Tunnel), so there's no inbound port to filter.
-2. **Application**: every request must carry a valid bearer token (see [`backend/app/security/auth.py`](../backend/app/security/auth.py)), verified in constant time. Good enough for single-user usage — no account/role concept in V1.
+2. **Application**: every request must carry a valid bearer token (see [`backend/app/security/auth.py`](../backend/app/security/auth.py)), verified in constant time. Good enough for single-user usage — there's no account/role concept.
 
-## Current status (M7 — V1 complete)
+## Backend module layout
 
-- **M0**: end-to-end chain — `/healthz` (public) and `/api/ping` (token-protected) on the backend, a frontend home page that checks the connection through the proxy.
-- **M1**: multi-tenant config (`config/tenants.yaml`, hot-reload) + local/SSH execution abstraction — see [`multi-tenant.md`](multi-tenant.md) and [`execution-model.md`](execution-model.md). `/api/ping` resolves the active tenant from `X-Tenant-Id`, `TenantSelector` (frontend) lets you switch between tenants.
-- **M2**: conversational agent — `POST /api/chat` (`app/routers/chat.py`) drives the tool-calling loop (`app/agent/loop.py`) against Ollama, with the first tool (`kubectl_get`), the secret anonymizer, and the guardrails ported with tests. Streaming to the frontend follows the AI SDK UI Message Stream Protocol, hand-implemented on the Python side (`app/stream/aisdk_protocol.py`) — see [`protocol.md`](protocol.md). `ChatPanel` (frontend, `@ai-sdk/react`) consumes this stream through the proxy, fixed to stream instead of buffering.
-- **M3**: full confirmation flow — a second tool (`run_command`, classified dynamically by the guardrails), the `ApprovalRequired` → `tool-approval-request`/`data-approval-details` → `ConfirmCard` (frontend) → `addToolApprovalResponse` → automatic resubmission → actual execution or denial branching on the backend. Uses the Vercel AI SDK's native approval mechanism rather than a custom protocol (see [ADR 0002](adr/0002-native-tool-approval-instead-of-custom-confirmation.md)). `SafetyModeBadge` lets you change modes from the UI. Full detail in [`security-model.md`](security-model.md).
+| Module | What lives there |
+|---|---|
+| `app/config/` | Tenant + global config loading and hot-reload (`tenants.py`), the config schema (`schema.py`) |
+| `app/security/` | Bearer token auth (`auth.py`) |
+| `app/exec/` | Command execution abstraction — `base.py` (interface), `local.py` (subprocess), `ssh.py` (remote, via `asyncssh`) — see [`execution-model.md`](execution-model.md) |
+| `app/agent/` | The tool-calling loop (`loop.py`), internal events (`events.py`), the secret anonymizer (`anonymizer.py`), command guardrails (`guardrails.py`), the system prompt (`prompt.py`), and the tool implementations (`tools/`) |
+| `app/stream/` | LLM provider implementations (`ollama_provider.py`, `lmstudio_provider.py`, `airllm_provider.py`) behind a common dispatcher (`providers.py`), plus the AI SDK streaming-protocol encoder (`aisdk_protocol.py`) — see [`llm-providers.md`](llm-providers.md) and [`protocol.md`](protocol.md) |
+| `app/rag/` | The RAG pipeline — scraping (`docs_gen.py`), chunking (`chunking.py`), embeddings (`embeddings.py`), Qdrant storage (`store.py`), search + citations (`context.py`) — see [`rag.md`](rag.md) |
+| `app/routers/` | The HTTP surface — `chat.py`, `tenants.py`, `tools.py`, `rag.py`, `llm.py`, `health.py` |
 
-- **M4**: read-tool parity (all always-safe, no guardrail) — `kubectl_describe`, `kubectl_logs`, `argocd_app_list`/`argocd_app_status` (via `kubectl get applications`, no dependency on the dedicated `argocd` CLI), `cloud_cli` (Azure `az` CLI in V1, read-only enforced by the tool itself — list/show/get/describe only). Tools available in total: `kubectl_get/describe/logs`, `argocd_app_list/status`, `cloud_cli`, `run_command` (guarded).
-- **M5**: full RAG pipeline — doc generation via scraping (`app/rag/docs_gen.py`), heading-structure chunking (`app/rag/chunking.py`), 100% local embeddings via Ollama (`app/rag/embeddings.py`), Qdrant storage with one collection per tenant (`app/rag/store.py`), search + citations (`app/rag/context.py`). RAG mode in the chat (Ops/RAG toggle in the UI), `POST /api/rag/generate` and `GET /api/rag/status` endpoints. Full detail in [`rag.md`](rag.md).
-- **M6**: hardening — CORS tightened to a configurable allowlist (`AEGIS_ALLOWED_ORIGINS`, no more wildcard), structured logging + guardrail decision audit trail (`app/logging_config.py`, see [`security-model.md`](security-model.md#audit)), automatic Ollama detection at startup, optional `known_hosts_path` to pin SSH host keys (see [`execution-model.md`](execution-model.md)). Deployment guide (Cloudflare Tunnel + Vercel) in [`deployment.md`](deployment.md) — manual steps, requiring the operator's own accounts.
-- **M7**: full documentation review — fixed sections that had gone stale across milestones (`protocol.md` and `multi-tenant.md` still referenced some milestones as "upcoming" even though they were done), verified all internal links resolve to real files, added a `known_hosts_path` example to `config/tenants.yaml.example`.
+The agent loop, the provider dispatcher, and the AI SDK encoder each know nothing about the other two's internals — `loop.py` yields provider-agnostic events, `aisdk_protocol.py` is the only place that translates them into the wire format (see [`protocol.md`](protocol.md#separation-of-concerns)), and swapping a tenant's LLM provider never touches either.
 
-Post-V1: LM Studio and AirLLM added as alternate chat LLM providers, per tenant (`llm.provider` in `config/tenants.yaml`, alongside the existing `ollama`) — a common provider abstraction (`app/stream/providers.py`) now sits between `app/agent/loop.py` and all three. RAG embeddings are unaffected: they still always go through Ollama regardless of which provider answers chat. Full detail in [`llm-providers.md`](llm-providers.md).
+## Frontend layout
 
-That's the end of the V1 scope as planned — see [ADR 0001](adr/0001-python-backend-nextjs-frontend-split.md) and [ADR 0002](adr/0002-native-tool-approval-instead-of-custom-confirmation.md) for the architecture decisions that shaped these seven milestones, and the "Deferred" sections of [`rag.md`](rag.md) for what's next (V1.1).
+`components/chat/` holds the conversation UI (`ChatPanel`, `ToolCallCard`, `ConfirmCard`, `SafetyModeBadge`, `RagSourcesFooter`); `components/sidebar/` holds the per-tenant controls (`TenantSelector`, `ModelSelector`, `ConfigPanel`, `ToolsPanel`, `RagDocumentsPanel`, `RagStatusPanel`). Shared tenant state lives in `hooks/useTenant.tsx`; the typed API client is in `lib/api.ts`.
+
+See [ADR 0001](adr/0001-python-backend-nextjs-frontend-split.md) and [ADR 0002](adr/0002-native-tool-approval-instead-of-custom-confirmation.md) for the reasoning behind the frontend/backend split and the confirmation-flow design, and [`rag.md`](rag.md#not-yet-implemented) for what isn't built yet.
