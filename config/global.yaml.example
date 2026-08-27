@@ -3,7 +3,12 @@
 # tenants.yaml — see docs/multi-tenant.md.
 
 ollama:
-  url: "http://localhost:11434"
+  # host.docker.internal: reaches Ollama running on your machine from
+  # inside the backend's Docker container (the default via
+  # ./quickstart.sh / docker-compose.yml). Running the backend directly on
+  # the host instead (see README.md "Developing locally, without Docker")?
+  # Change this to http://localhost:11434.
+  url: "http://host.docker.internal:11434"
 
 exec:
   mode: local # local | ssh — see docs/execution-model.md

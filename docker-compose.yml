@@ -25,6 +25,21 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # For the quickstart only — a real deployment runs the frontend on
+  # Vercel instead (see docs/deployment.md). Talks to `backend` over the
+  # Docker network by service name, not localhost/127.0.0.1: no loopback
+  # ambiguity to worry about here (see frontend/.env.example for why that
+  # matters when running the frontend outside Docker).
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      AEGIS_BACKEND_URL: http://backend:8765
+      AEGIS_BACKEND_TOKEN: ${AEGIS_BACKEND_TOKENS:-changeme-dev-token}
+    depends_on:
+      - backend
+
   # Optional — publicly exposes the backend via Cloudflare Tunnel instead
   # of opening a port. Uncomment + set CLOUDFLARE_TUNNEL_TOKEN (generated
   # by `cloudflared tunnel token <tunnel-name>`) — see docs/deployment.md

@@ -22,24 +22,32 @@ Aegis isn't an autonomous "AI SRE" that fixes things on its own, and it isn't a 
 
 ## Quickstart
 
-Prerequisites: Docker, Node 18+, [Ollama](https://ollama.com) (optional — auto-detected if present on `localhost:11434`). For RAG, the `nomic-embed-text` embedding model must be available (`ollama pull nomic-embed-text`).
+Prerequisite: Docker — nothing else, Node/npm included (the frontend runs in its own container too).
+
+```bash
+./quickstart.sh
+```
+
+That's it — one command, `http://localhost:3000` when it's done. It copies the example configs (only the ones that don't already exist — never overwrites a real setup) and brings up Qdrant, the backend, and the frontend. The `demo` tenant is preconfigured and ready to talk to. Point it at your own cluster from **⚙️ Settings → 🗂️ Tenant administration** in the sidebar, or by editing `config/tenants.yaml` directly (see [`docs/multi-tenant.md`](docs/multi-tenant.md)).
+
+Optional: [Ollama](https://ollama.com) running locally is auto-detected (`localhost:11434`) — needed for the chat LLM and RAG embeddings. For RAG specifically, pull the embedding model first: `ollama pull nomic-embed-text`.
+
+<details>
+<summary>What the script does, step by step (or run it yourself without the script)</summary>
 
 ```bash
 cp .env.example .env
 cp config/global.yaml.example config/global.yaml
 cp config/tenants.yaml.example config/tenants.yaml
 
-docker compose up -d        # backend + Qdrant
-
-cd frontend
-cp .env.example .env.local
-npm install
-npm run dev                 # → http://localhost:3000
+docker compose up -d --build   # Qdrant + backend + frontend
 ```
 
-That's it — the `demo` tenant is preconfigured and ready to talk to. Point it at your own cluster from **⚙️ Settings → 🗂️ Tenant administration** in the sidebar, or by editing `config/tenants.yaml` directly (see [`docs/multi-tenant.md`](docs/multi-tenant.md)).
+</details>
 
-### Backend in dev, without Docker
+### Developing locally, without Docker
+
+Backend:
 
 ```bash
 docker compose up -d qdrant  # RAG still needs Qdrant
@@ -47,6 +55,15 @@ docker compose up -d qdrant  # RAG still needs Qdrant
 # from the repo root (config paths are relative to cwd)
 AEGIS_BACKEND_TOKENS=changeme-dev-token \
   uv run --project backend uvicorn app.main:app --app-dir backend --reload --port 8766
+```
+
+Frontend, in another terminal:
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev                 # → http://localhost:3000
 ```
 
 ## How it fits together
