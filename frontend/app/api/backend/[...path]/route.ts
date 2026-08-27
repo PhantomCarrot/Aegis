@@ -10,7 +10,12 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.AEGIS_BACKEND_URL ?? "http://localhost:8765";
+// 127.0.0.1, not "localhost": on a machine with other local port-forwards
+// (an SSH tunnel, another dev server, ...) bare "localhost" can resolve to
+// ::1 first and silently hit the wrong service on the same port — same
+// reasoning as .env.example. This fallback only matters if
+// AEGIS_BACKEND_URL is unset, but it should fail the same safe way.
+const BACKEND_URL = process.env.AEGIS_BACKEND_URL ?? "http://127.0.0.1:8765";
 const BACKEND_TOKEN = process.env.AEGIS_BACKEND_TOKEN ?? "";
 
 type Params = { path: string[] };
