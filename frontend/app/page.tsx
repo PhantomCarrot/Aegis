@@ -9,6 +9,7 @@ import { ConfigPanel } from "@/components/sidebar/ConfigPanel";
 import { ModelSelector } from "@/components/sidebar/ModelSelector";
 import { RagDocumentsPanel } from "@/components/sidebar/RagDocumentsPanel";
 import { RagStatusPanel } from "@/components/sidebar/RagStatusPanel";
+import { TenantAdminPanel } from "@/components/sidebar/TenantAdminPanel";
 import { TenantSelector } from "@/components/sidebar/TenantSelector";
 import { ToolsPanel } from "@/components/sidebar/ToolsPanel";
 import { useTenant } from "@/hooks/useTenant";
@@ -117,6 +118,8 @@ export default function Home() {
           />
 
           <ConfigPanel activeTenantId={activeTenantId} />
+
+          <TenantAdminPanel />
         </CollapsibleSidebar>
 
         <main className="flex min-h-0 min-w-0 flex-1 items-start justify-center overflow-y-auto p-8">

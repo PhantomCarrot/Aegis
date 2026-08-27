@@ -46,13 +46,15 @@ It's not just a matter of which schemas get sent to the LLM: the agent loop (`ap
         }
       }
     }
-  ]
+  ],
+  "groups": ["kubectl", "argocd", "cloud_cli", "run_command"]
 }
 ```
 
 - `enabled`: allowed by `tenant.tools_enabled` (bound (2) above — not yet narrowed by any runtime `enabledTools`, which is scoped to a conversation, not the config).
 - `guarded`: subject to guardrails (`classify` is not `None`, see [`security-model.md`](security-model.md)) — `kubectl_get` isn't (always-safe), `run_command` is (dynamic command classification).
 - `schema`: this tool's canonical schema (`tool_to_ollama_schema()`, the same function used by `app/agent/loop.py`) — named for the Ollama-shaped function-calling format it matches, which happens to already be OpenAI-compatible, so LM Studio gets it unchanged; only AirLLM's `_tools_instructions` (`app/stream/airllm_provider.py`) turns it into prompt text instead, since AirLLM has no native function-calling. Useful for understanding why a model does (or doesn't) pick a given tool, regardless of which provider the tenant actually runs.
+- `groups` (top-level, not per-tool): the identifiers `tenant.tools_enabled` actually accepts in `tenants.yaml` — named groups (`kubectl`, `argocd`) plus any standalone tool not part of one (`cloud_cli`, `run_command`), from `ui_tool_groups()` in `app/agent/tools/registry.py`. The tenant-administration UI's tools checklist reads this list directly rather than hardcoding it — see [`multi-tenant.md`](multi-tenant.md#editing-tenants-without-touching-yaml).
 
 Displayed in the UI's **⚙️ Settings** panel: a list of tools with a toggle per tool (feeds `enabledTools`) and each tool's description underneath (`ToolsPanel.tsx` reads `schema.function.description` — the raw JSON schema itself isn't rendered in the UI, use `GET /api/tools` directly if you need it).
 

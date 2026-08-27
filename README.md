@@ -37,7 +37,7 @@ npm install
 npm run dev                 # → http://localhost:3000
 ```
 
-That's it — the `demo` tenant is preconfigured and ready to talk to. Point it at your own cluster by editing `config/tenants.yaml` (see [`docs/multi-tenant.md`](docs/multi-tenant.md)).
+That's it — the `demo` tenant is preconfigured and ready to talk to. Point it at your own cluster from **⚙️ Settings → 🗂️ Tenant administration** in the sidebar, or by editing `config/tenants.yaml` directly (see [`docs/multi-tenant.md`](docs/multi-tenant.md)).
 
 ### Backend in dev, without Docker
 

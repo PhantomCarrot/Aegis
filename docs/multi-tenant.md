@@ -46,6 +46,10 @@ tenants:
 
 See [`config/tenants.yaml.example`](../config/tenants.yaml.example) and [`config/global.yaml.example`](../config/global.yaml.example) for commented examples, and [`execution-model.md`](execution-model.md) for the detail of `exec.mode`.
 
+### Editing tenants without touching YAML
+
+Tenants can also be created, edited, and deleted from the app itself — expand **⚙️ Settings → 🗂️ Tenant administration** in the sidebar. Changes are written straight to `tenants.yaml` (comments and formatting on every other tenant are preserved) and take effect on the very next request, exactly as if the file had been edited by hand — see "Hot reload" below. Hand-editing `tenants.yaml` directly remains fully supported and unaffected; the UI is just a faster path for routine changes. `global.yaml` isn't editable from the UI yet — its defaults still need a hand edit.
+
 ## Hot reload
 
 Both files are watched independently by comparing `mtime` on every request (no watcher, near-zero cost). Editing `tenants.yaml` or `global.yaml` takes effect **immediately**, without restarting the backend — handy for adding a client mid-session. An invalid config (malformed YAML, unknown `default_tenant`, `exec.mode: ssh` without an `ssh` block…) fails explicitly (clear error message returned by `/api/tenants`), never silently.

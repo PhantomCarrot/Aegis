@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from app.agent.tools.registry import _ALL_TOOLS, tenant_allowed_tool_names, tool_to_ollama_schema
+from app.agent.tools.registry import _ALL_TOOLS, tenant_allowed_tool_names, tool_to_ollama_schema, ui_tool_groups
 from app.config.schema import TenantConfig
 from app.config.tenants import resolve_tenant
 from app.security.auth import RequireAuth
@@ -34,5 +34,9 @@ def list_tools(tenant: Annotated[TenantConfig, Depends(resolve_tenant)]) -> dict
                 "schema": tool_to_ollama_schema(tool),
             }
             for name, tool in sorted(_ALL_TOOLS.items())
-        ]
+        ],
+        # Group-level identifiers (kubectl, argocd, cloud_cli, run_command)
+        # for a "which tools" checklist — see the tenant-admin UI, which
+        # writes these directly into tenant.tools_enabled.
+        "groups": ui_tool_groups(),
     }

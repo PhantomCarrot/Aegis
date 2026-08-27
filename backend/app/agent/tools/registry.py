@@ -11,7 +11,15 @@ from app.agent.tools import argocd, cloud_cli, kubectl, run_command
 from app.agent.tools.types import Tool, ToolContext
 from app.config.schema import TenantConfig
 
-__all__ = ["Tool", "ToolContext", "get_enabled_tools", "get_tool", "tenant_allowed_tool_names", "tool_to_ollama_schema"]
+__all__ = [
+    "Tool",
+    "ToolContext",
+    "get_enabled_tools",
+    "get_tool",
+    "tenant_allowed_tool_names",
+    "tool_to_ollama_schema",
+    "ui_tool_groups",
+]
 
 _ALL_TOOLS: dict[str, Tool] = {
     "kubectl_get": kubectl.KUBECTL_GET_TOOL,
@@ -55,6 +63,19 @@ def get_enabled_tools(tenant: TenantConfig, override_names: set[str] | None = No
 
 def get_tool(name: str) -> Tool | None:
     return _ALL_TOOLS.get(name)
+
+
+def ui_tool_groups() -> list[str]:
+    """
+    Top-level identifiers for a simple "which tools" checklist: named groups
+    plus any tool that isn't part of one, shown as a singleton group of
+    itself — e.g. ["kubectl", "argocd", "cloud_cli", "run_command"], matching
+    the style used in config/tenants.yaml.example. Exposed via GET /api/tools
+    so the tenant-admin UI doesn't need its own hardcoded list.
+    """
+    grouped = set().union(*_TOOL_GROUPS.values()) if _TOOL_GROUPS else set()
+    ungrouped = sorted(_ALL_TOOLS.keys() - grouped)
+    return list(_TOOL_GROUPS.keys()) + ungrouped
 
 
 def tool_to_ollama_schema(tool: Tool) -> dict:

@@ -42,14 +42,29 @@ class TenantNotFoundError(Exception):
         super().__init__(f"Unknown tenant: {tenant_id!r}")
 
 
-def _deep_merge(base: dict, override: dict) -> dict:
+def deep_merge(base: dict, override: dict) -> dict:
+    """Recursive dict merge, override wins per leaf key — only recurses into
+    nested dicts. Shared with app/config/writer.py, which validates a
+    tenant's merged config the same way before writing it to disk."""
     merged = dict(base)
     for key, value in override.items():
         if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
-            merged[key] = _deep_merge(merged[key], value)
+            merged[key] = deep_merge(merged[key], value)
         else:
             merged[key] = value
     return merged
+
+
+def load_global_config(path: Path) -> GlobalConfig:
+    """global.yaml is optional — absence = Python defaults, not an error.
+    Shared with app/config/writer.py."""
+    if not path.exists():
+        return GlobalConfig()
+    try:
+        raw_global = yaml.safe_load(path.read_text()) or {}
+        return GlobalConfig.model_validate(raw_global)
+    except (yaml.YAMLError, ValidationError) as e:
+        raise TenantsConfigError(f"Invalid config in {path}: {e}") from e
 
 
 def _mtime(path: Path) -> float | None:
@@ -80,15 +95,7 @@ class TenantRegistry:
         self._loaded_once = False
 
     def _load(self) -> None:
-        # global.yaml is optional — absence = Python defaults, not an error.
-        if self._global_path.exists():
-            try:
-                raw_global = yaml.safe_load(self._global_path.read_text()) or {}
-                global_cfg = GlobalConfig.model_validate(raw_global)
-            except (yaml.YAMLError, ValidationError) as e:
-                raise TenantsConfigError(f"Invalid config in {self._global_path}: {e}") from e
-        else:
-            global_cfg = GlobalConfig()
+        global_cfg = load_global_config(self._global_path)
 
         if not self._tenants_path.exists():
             raise TenantsConfigError(
@@ -105,7 +112,7 @@ class TenantRegistry:
         defaults_dict = global_cfg.model_dump()
         tenants: dict[str, TenantConfig] = {}
         for tenant_id, raw_tenant in tenants_file.tenants.items():
-            merged = _deep_merge(defaults_dict, raw_tenant)
+            merged = deep_merge(defaults_dict, raw_tenant)
             merged["id"] = tenant_id
             try:
                 tenants[tenant_id] = TenantConfig.model_validate(merged)
