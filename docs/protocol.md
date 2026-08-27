@@ -40,7 +40,7 @@ sequenceDiagram
     Enc->>UI: data: {"type":"start-step"}
     AgentLoop->>Enc: TextStart(id)
     Enc->>UI: data: {"type":"text-start","id":...}
-    loop Ollama deltas
+    loop LLM deltas
         AgentLoop->>Enc: TextDelta(id, delta)
         Enc->>UI: data: {"type":"text-delta","id":...,"delta":...}
     end
@@ -79,4 +79,4 @@ sequenceDiagram
 
 ## Known limitation (V1)
 
-The history sent to Ollama between two HTTP turns doesn't reconstruct already-resolved `dynamic-tool` parts (`state: "output-available"`) from previous turns — only the assistant's text about them is kept (see `_extract_text`, `app/routers/chat.py`). M3 added a special case, not full reconstruction: `_find_pending_approval` inspects the history for a part in `"approval-responded"` state (a confirmation that was just resolved) and executes it, but a tool result already shown earlier in the conversation isn't re-fed to Ollama as structured context on later turns. In practice, the LLM keeps the text it wrote about it itself, which covers most exchanges but can lose detail over a long history. No dedicated milestone planned for full reconstruction — to do if the need is confirmed in practice.
+The history sent to the LLM between two HTTP turns doesn't reconstruct already-resolved `dynamic-tool` parts (`state: "output-available"`) from previous turns — only the assistant's text about them is kept (see `_extract_text`, `app/routers/chat.py`). M3 added a special case, not full reconstruction: `_find_pending_approval` inspects the history for a part in `"approval-responded"` state (a confirmation that was just resolved) and executes it, but a tool result already shown earlier in the conversation isn't re-fed to the LLM as structured context on later turns. In practice, the LLM keeps the text it wrote about it itself, which covers most exchanges but can lose detail over a long history. No dedicated milestone planned for full reconstruction — to do if the need is confirmed in practice.
