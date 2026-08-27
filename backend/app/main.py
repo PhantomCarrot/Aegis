@@ -101,4 +101,4 @@ def ping(tenant: Annotated[TenantConfig, Depends(resolve_tenant)]) -> dict:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8765, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8766, reload=True)

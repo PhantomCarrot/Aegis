@@ -9,7 +9,10 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8765:8765"
+      # Host:container — only the host side needs to avoid local port
+      # collisions (e.g. an SSH tunnel already using 8765); the container's
+      # internal port stays 8765, see backend/Dockerfile.
+      - "8766:8765"
     environment:
       AEGIS_BACKEND_TOKENS: ${AEGIS_BACKEND_TOKENS:-changeme-dev-token}
       AEGIS_ALLOWED_ORIGINS: ${AEGIS_ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}

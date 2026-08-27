@@ -19,7 +19,7 @@ cloudflared tunnel create aegis-backend
 cloudflared tunnel route dns aegis-backend aegis-backend.yourdomain.com
 
 # Point the tunnel at the local backend
-cloudflared tunnel run --url http://localhost:8765 aegis-backend
+cloudflared tunnel run --url http://localhost:8766 aegis-backend
 ```
 
 For a service that runs continuously (not just a test), use a config file (`~/.cloudflared/config.yml`) and a system service (`cloudflared service install`) instead of `tunnel run` in the foreground — see the [official Cloudflare docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).

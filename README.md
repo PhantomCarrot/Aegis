@@ -46,7 +46,7 @@ docker compose up -d qdrant  # RAG still needs Qdrant
 
 # from the repo root (config paths are relative to cwd)
 AEGIS_BACKEND_TOKENS=changeme-dev-token \
-  uv run --project backend uvicorn app.main:app --app-dir backend --reload --port 8765
+  uv run --project backend uvicorn app.main:app --app-dir backend --reload --port 8766
 ```
 
 ## How it fits together
