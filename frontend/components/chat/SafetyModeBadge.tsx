@@ -10,6 +10,12 @@ const MODES = [
 
 export type SafetyMode = (typeof MODES)[number]["value"];
 
+// Reused by StatusStrip, which shows the current mode without rendering the
+// full segmented control.
+export const SAFETY_MODE_LABEL: Record<SafetyMode, string> = Object.fromEntries(
+  MODES.map((m) => [m.value, m.label]),
+) as Record<SafetyMode, string>;
+
 export function SafetyModeBadge({
   value,
   onChange,

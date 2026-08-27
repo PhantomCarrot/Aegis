@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { SafetyModeBadge, type SafetyMode } from "@/components/chat/SafetyModeBadge";
-import { CollapsibleSidebar } from "@/components/layout/CollapsibleSidebar";
+import { CommandRail } from "@/components/layout/CommandRail";
+import { StatusStrip } from "@/components/layout/StatusStrip";
 import { ConfigPanel } from "@/components/sidebar/ConfigPanel";
 import { ModelSelector } from "@/components/sidebar/ModelSelector";
 import { RagDocumentsPanel } from "@/components/sidebar/RagDocumentsPanel";
@@ -30,8 +31,9 @@ export default function Home() {
   const activeTenantId = tenant.status === "ready" ? tenant.activeTenantId : null;
   const [ping, setPing] = useState<PingState>({ status: "loading" });
 
-  // Settings driven from the sidebars, consumed by ChatPanel — see
-  // docs/tools.md for enabledTools, docs/multi-tenant.md for model/Ollama.
+  // Settings driven from the rail, consumed by ChatPanel (and StatusStrip,
+  // for the always-visible recap) — see docs/tools.md for enabledTools,
+  // docs/multi-tenant.md for model/Ollama.
   const [safetyMode, setSafetyMode] = useState<SafetyMode>("readonly");
   const [chatMode, setChatMode] = useState<ChatMode>("ops");
   const [model, setModel] = useState<string | null>(null);
@@ -104,43 +106,56 @@ export default function Home() {
         </div>
       </header>
 
+      <StatusStrip
+        activeTenantId={activeTenantId}
+        tenantName={ping.status === "ok" ? ping.tenant.name : null}
+        connected={ping.status === "ok"}
+        model={model}
+        safetyMode={safetyMode}
+      />
+
       <div className="flex min-h-0 flex-1">
-        <CollapsibleSidebar side="left" title="⚙️ Settings">
-          <ModelSelector activeTenantId={activeTenantId} value={model} onChange={setModel} />
+        <CommandRail
+          settingsContent={
+            <>
+              <ModelSelector activeTenantId={activeTenantId} value={model} onChange={setModel} />
 
-          <Panel eyebrow="Safety" category="settings" collapsible={false}>
-            <SafetyModeBadge value={safetyMode} onChange={setSafetyMode} />
-          </Panel>
+              <Panel eyebrow="Safety" category="settings" collapsible={false}>
+                <SafetyModeBadge value={safetyMode} onChange={setSafetyMode} />
+              </Panel>
 
-          <ToolsPanel
-            activeTenantId={activeTenantId}
-            enabledTools={enabledTools}
-            onChangeEnabledTools={setEnabledTools}
-          />
+              <ToolsPanel
+                activeTenantId={activeTenantId}
+                enabledTools={enabledTools}
+                onChangeEnabledTools={setEnabledTools}
+              />
 
-          <ConfigPanel activeTenantId={activeTenantId} />
+              <ConfigPanel activeTenantId={activeTenantId} />
 
-          <TenantAdminPanel />
-        </CollapsibleSidebar>
+              <TenantAdminPanel />
+            </>
+          }
+          ragContent={
+            <>
+              <Segmented
+                ariaLabel="Chat mode"
+                value={chatMode}
+                onChange={setChatMode}
+                options={[
+                  { value: "ops", label: "Ops" },
+                  { value: "rag", label: "RAG" },
+                ]}
+              />
+
+              <RagStatusPanel activeTenantId={activeTenantId} />
+              <RagDocumentsPanel activeTenantId={activeTenantId} />
+            </>
+          }
+        />
 
         <main className="flex min-h-0 min-w-0 flex-1 items-start justify-center overflow-y-auto p-8">
           <ChatPanel safetyMode={safetyMode} chatMode={chatMode} model={model} enabledTools={enabledTools} />
         </main>
-
-        <CollapsibleSidebar side="right" title="📚 RAG">
-          <Segmented
-            ariaLabel="Chat mode"
-            value={chatMode}
-            onChange={setChatMode}
-            options={[
-              { value: "ops", label: "Ops" },
-              { value: "rag", label: "RAG" },
-            ]}
-          />
-
-          <RagStatusPanel activeTenantId={activeTenantId} />
-          <RagDocumentsPanel activeTenantId={activeTenantId} />
-        </CollapsibleSidebar>
       </div>
     </div>
   );
