@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { Panel } from "@/components/ui/Panel";
 import { apiFetch } from "@/lib/api";
 
 type Provider = "ollama" | "lmstudio" | "airllm";
@@ -75,24 +76,19 @@ export function ModelSelector({
   const isFixed = provider === "airllm";
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">
-          {provider ? PROVIDER_LABEL[provider] : "Model"}
-        </span>
-      </div>
+    <Panel eyebrow={provider ? PROVIDER_LABEL[provider] : "Model"} category="settings" collapsible={false}>
       {endpointUrl && (
-        <span className="truncate font-mono text-[10px] text-zinc-400" title={endpointUrl}>
+        <span className="truncate font-mono text-[10px] text-aegis-faint" title={endpointUrl}>
           {endpointUrl}
         </span>
       )}
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-aegis-danger">{error}</p>}
       <select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
         disabled={isFixed || !models || models.length === 0}
         title={isFixed ? "Fixed by this tenant's llm.airllm.model config — see docs/llm-providers.md" : undefined}
-        className="rounded-md border border-black/10 bg-white px-2 py-1.5 text-sm text-black disabled:opacity-40 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+        className="rounded-md border border-aegis-border bg-aegis-surface-2 px-2 py-1.5 text-sm text-aegis-text disabled:opacity-40"
       >
         {/* Distinct from "Loading…" — no active tenant means no fetch was
             ever attempted, so it must never look like one is in flight. */}
@@ -105,6 +101,6 @@ export function ModelSelector({
           </option>
         ))}
       </select>
-    </div>
+    </Panel>
   );
 }

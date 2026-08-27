@@ -70,9 +70,9 @@ export function ChatPanel({
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-4">
-      <div className="flex min-h-[16rem] flex-col gap-3 rounded-lg border border-black/10 bg-white/50 p-4 dark:border-white/10 dark:bg-white/5">
+      <div className="flex min-h-[16rem] flex-col gap-3 rounded-lg border border-aegis-border bg-aegis-surface p-4">
         {messages.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-aegis-dim">
             {chatMode === "rag"
               ? "RAG mode: answers are grounded in the indexed docs (see the RAG panel on the right)."
               : "Ask a question about your infra — e.g. « list pods in the default namespace »."}
@@ -85,11 +85,11 @@ export function ChatPanel({
           );
           return (
             <div key={message.id} className="flex flex-col gap-2">
-              <div className="text-[10px] uppercase tracking-wide text-zinc-400">{message.role}</div>
+              <div className="text-[10px] uppercase tracking-wide text-aegis-faint">{message.role}</div>
               {message.parts.map((part, i) => {
                 if (part.type === "text") {
                   return (
-                    <p key={i} className="whitespace-pre-wrap text-sm text-zinc-800 dark:text-zinc-200">
+                    <p key={i} className="whitespace-pre-wrap text-sm text-aegis-text">
                       {part.text}
                     </p>
                   );
@@ -119,8 +119,8 @@ export function ChatPanel({
             </div>
           );
         })}
-        {busy && <p className="text-xs text-zinc-400">…</p>}
-        {error && <p className="text-xs text-red-500">{error.message}</p>}
+        {busy && <p className="text-xs text-aegis-faint">…</p>}
+        {error && <p className="text-xs text-aegis-danger">{error.message}</p>}
       </div>
 
       <form onSubmit={submit} className="flex gap-2">
@@ -129,12 +129,12 @@ export function ChatPanel({
           onChange={(e) => setInput(e.target.value)}
           placeholder="Write a message…"
           disabled={busy}
-          className="flex-1 rounded-md border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+          className="flex-1 rounded-md border border-aegis-border bg-aegis-surface px-3 py-2 text-sm text-aegis-text"
         />
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-40 dark:bg-white dark:text-black"
+          className="rounded-md bg-aegis-accent px-4 py-2 text-sm font-semibold text-aegis-accent-ink disabled:opacity-40"
         >
           Send
         </button>

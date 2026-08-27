@@ -12,6 +12,9 @@ import { RagStatusPanel } from "@/components/sidebar/RagStatusPanel";
 import { TenantAdminPanel } from "@/components/sidebar/TenantAdminPanel";
 import { TenantSelector } from "@/components/sidebar/TenantSelector";
 import { ToolsPanel } from "@/components/sidebar/ToolsPanel";
+import { Panel } from "@/components/ui/Panel";
+import { Segmented } from "@/components/ui/Segmented";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTenant } from "@/hooks/useTenant";
 import { apiFetch } from "@/lib/api";
 
@@ -72,33 +75,32 @@ export default function Home() {
   }, [activeTenantId]);
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-50 font-sans dark:bg-black">
-      <header className="flex flex-shrink-0 items-center justify-between border-b border-black/10 px-6 py-3 dark:border-white/10">
+    <div className="flex h-screen flex-col bg-aegis-bg font-sans text-aegis-text">
+      <header className="flex flex-shrink-0 items-center justify-between border-b border-aegis-border px-6 py-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-black dark:text-zinc-50">Aegis</h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            A private, multi-tenant conversational operations console.
-          </p>
+          <h1 className="text-lg font-semibold tracking-tight text-aegis-text">Aegis</h1>
+          <p className="text-xs text-aegis-dim">A private, multi-tenant conversational operations console.</p>
         </div>
         <div className="flex items-center gap-3">
           <TenantSelector />
-          <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs dark:border-white/10 dark:bg-zinc-900">
+          <div className="flex items-center gap-2 rounded-full border border-aegis-border bg-aegis-surface px-3 py-1.5 text-xs">
             <span
               className={
                 "h-2 w-2 rounded-full " +
                 (ping.status === "ok"
-                  ? "bg-emerald-500"
+                  ? "bg-aegis-ok"
                   : ping.status === "error"
-                    ? "bg-red-500"
-                    : "bg-amber-400 animate-pulse")
+                    ? "bg-aegis-danger"
+                    : "bg-aegis-warn animate-pulse")
               }
             />
-            <span className="text-zinc-700 dark:text-zinc-300">
+            <span className="text-aegis-dim">
               {ping.status === "loading" && "Connecting…"}
               {ping.status === "ok" && `Connected — ${ping.tenant.name}`}
               {ping.status === "error" && `Unreachable: ${ping.message}`}
             </span>
           </div>
+          <ThemeToggle />
         </div>
       </header>
 
@@ -106,10 +108,9 @@ export default function Home() {
         <CollapsibleSidebar side="left" title="⚙️ Settings">
           <ModelSelector activeTenantId={activeTenantId} value={model} onChange={setModel} />
 
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">Safety</span>
+          <Panel eyebrow="Safety" category="settings" collapsible={false}>
             <SafetyModeBadge value={safetyMode} onChange={setSafetyMode} />
-          </div>
+          </Panel>
 
           <ToolsPanel
             activeTenantId={activeTenantId}
@@ -127,26 +128,15 @@ export default function Home() {
         </main>
 
         <CollapsibleSidebar side="right" title="📚 RAG">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">Chat mode</span>
-            <div className="flex items-center gap-1 rounded-full border border-black/10 bg-white p-1 text-xs dark:border-white/10 dark:bg-zinc-900">
-              {(["ops", "rag"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setChatMode(m)}
-                  className={
-                    "rounded-full px-3 py-1 transition-colors " +
-                    (chatMode === m
-                      ? "bg-black text-white dark:bg-white dark:text-black"
-                      : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100")
-                  }
-                >
-                  {m === "ops" ? "Ops" : "RAG"}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Segmented
+            ariaLabel="Chat mode"
+            value={chatMode}
+            onChange={setChatMode}
+            options={[
+              { value: "ops", label: "Ops" },
+              { value: "rag", label: "RAG" },
+            ]}
+          />
 
           <RagStatusPanel activeTenantId={activeTenantId} />
           <RagDocumentsPanel activeTenantId={activeTenantId} />

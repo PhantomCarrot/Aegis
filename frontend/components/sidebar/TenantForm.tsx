@@ -194,55 +194,55 @@ export function TenantForm({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border border-black/10 p-3 dark:border-white/10">
+    <div className="flex flex-col gap-3 rounded-md border border-aegis-border bg-aegis-surface-2 p-3 text-xs">
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">Tenant id</label>
+        <label className="text-aegis-faint">Tenant id</label>
         <input
           type="text"
           value={form.id}
           disabled={mode === "edit"}
           onChange={(e) => setForm((f) => ({ ...f, id: e.target.value }))}
           placeholder="acme-corp"
-          className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono disabled:opacity-50 dark:border-white/10"
+          className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text disabled:opacity-50"
         />
         {mode === "create" && form.id && !idIsValid && (
-          <span className="text-red-500">
+          <span className="text-aegis-danger">
             lowercase letters, digits, hyphens only — can&apos;t start/end with a hyphen
           </span>
         )}
         {mode === "edit" && (
-          <span className="text-zinc-400">Can&apos;t be renamed — delete and recreate instead.</span>
+          <span className="text-aegis-faint">Can&apos;t be renamed — delete and recreate instead.</span>
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">Name</label>
+        <label className="text-aegis-faint">Name</label>
         <input
           type="text"
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          className="rounded border border-black/10 bg-transparent px-2 py-1 dark:border-white/10"
+          className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 text-aegis-text"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">Ollama URL (chat default + always used for RAG embeddings)</label>
+        <label className="text-aegis-faint">Ollama URL (chat default + always used for RAG embeddings)</label>
         <input
           type="text"
           value={form.ollamaUrl}
           onChange={(e) => setForm((f) => ({ ...f, ollamaUrl: e.target.value }))}
-          className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+          className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">LLM provider</label>
+        <label className="text-aegis-faint">LLM provider</label>
         <select
           value={form.llmProvider}
           onChange={(e) =>
             setForm((f) => ({ ...f, llmProvider: e.target.value as FormState["llmProvider"] }))
           }
-          className="rounded border border-black/10 bg-transparent px-2 py-1 dark:border-white/10"
+          className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 text-aegis-text"
         >
           <option value="ollama">Ollama</option>
           <option value="lmstudio">LM Studio</option>
@@ -251,41 +251,41 @@ export function TenantForm({
       </div>
 
       {form.llmProvider === "lmstudio" && (
-        <div className="flex flex-col gap-1 pl-3">
-          <label className="text-zinc-400">LM Studio URL</label>
+        <div className="flex flex-col gap-1 border-l-2 border-aegis-border pl-3">
+          <label className="text-aegis-faint">LM Studio URL</label>
           <input
             type="text"
             value={form.lmstudioUrl}
             onChange={(e) => setForm((f) => ({ ...f, lmstudioUrl: e.target.value }))}
-            className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+            className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
           />
         </div>
       )}
 
       {form.llmProvider === "airllm" && (
-        <div className="flex flex-col gap-2 pl-3">
+        <div className="flex flex-col gap-2 border-l-2 border-aegis-border pl-3">
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400">Model (HF repo id or local path)</label>
+            <label className="text-aegis-faint">Model (HF repo id or local path)</label>
             <input
               type="text"
               value={form.airllmModel}
               onChange={(e) => setForm((f) => ({ ...f, airllmModel: e.target.value }))}
               placeholder="meta-llama/Llama-3.2-3B-Instruct"
-              className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+              className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400">Device</label>
+            <label className="text-aegis-faint">Device</label>
             <input
               type="text"
               value={form.airllmDevice}
               onChange={(e) => setForm((f) => ({ ...f, airllmDevice: e.target.value }))}
               placeholder="cpu"
-              className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+              className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400">Compression</label>
+            <label className="text-aegis-faint">Compression</label>
             <select
               value={form.airllmCompression}
               onChange={(e) =>
@@ -294,7 +294,7 @@ export function TenantForm({
                   airllmCompression: e.target.value as FormState["airllmCompression"],
                 }))
               }
-              className="rounded border border-black/10 bg-transparent px-2 py-1 dark:border-white/10"
+              className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 text-aegis-text"
             >
               <option value="">none</option>
               <option value="4bit">4bit</option>
@@ -305,11 +305,11 @@ export function TenantForm({
       )}
 
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">Execution</label>
+        <label className="text-aegis-faint">Execution</label>
         <select
           value={form.execMode}
           onChange={(e) => setForm((f) => ({ ...f, execMode: e.target.value as FormState["execMode"] }))}
-          className="rounded border border-black/10 bg-transparent px-2 py-1 dark:border-white/10"
+          className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 text-aegis-text"
         >
           <option value="local">Local</option>
           <option value="ssh">SSH</option>
@@ -317,86 +317,87 @@ export function TenantForm({
       </div>
 
       {form.execMode === "ssh" && (
-        <div className="flex flex-col gap-2 pl-3">
+        <div className="flex flex-col gap-2 border-l-2 border-aegis-border pl-3">
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1">
-              <label className="text-zinc-400">Host</label>
+              <label className="text-aegis-faint">Host</label>
               <input
                 type="text"
                 value={form.sshHost}
                 onChange={(e) => setForm((f) => ({ ...f, sshHost: e.target.value }))}
-                className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+                className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
               />
             </div>
             <div className="w-16 flex-none flex-col gap-1">
-              <label className="text-zinc-400">Port</label>
+              <label className="text-aegis-faint">Port</label>
               <input
                 type="number"
                 value={form.sshPort}
                 onChange={(e) => setForm((f) => ({ ...f, sshPort: Number(e.target.value) || 22 }))}
-                className="w-full rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+                className="w-full rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
               />
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400">User</label>
+            <label className="text-aegis-faint">User</label>
             <input
               type="text"
               value={form.sshUser}
               onChange={(e) => setForm((f) => ({ ...f, sshUser: e.target.value }))}
-              className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+              className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400">Key path</label>
+            <label className="text-aegis-faint">Key path</label>
             <input
               type="text"
               value={form.sshKeyPath}
               onChange={(e) => setForm((f) => ({ ...f, sshKeyPath: e.target.value }))}
               placeholder="~/.ssh/aegis_acme-corp"
-              className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+              className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400">Certificate path (optional)</label>
+            <label className="text-aegis-faint">Certificate path (optional)</label>
             <input
               type="text"
               value={form.sshCertificatePath}
               onChange={(e) => setForm((f) => ({ ...f, sshCertificatePath: e.target.value }))}
-              className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+              className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400">Known hosts path (optional, recommended)</label>
+            <label className="text-aegis-faint">Known hosts path (optional, recommended)</label>
             <input
               type="text"
               value={form.sshKnownHostsPath}
               onChange={(e) => setForm((f) => ({ ...f, sshKnownHostsPath: e.target.value }))}
-              className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+              className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
             />
           </div>
         </div>
       )}
 
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">Kubeconfig dir (blank → ~/.kube/aegis/{"{id}"})</label>
+        <label className="text-aegis-faint">Kubeconfig dir (blank → ~/.kube/aegis/{"{id}"})</label>
         <input
           type="text"
           value={form.kubeconfigDir}
           onChange={(e) => setForm((f) => ({ ...f, kubeconfigDir: e.target.value }))}
-          className="rounded border border-black/10 bg-transparent px-2 py-1 font-mono dark:border-white/10"
+          className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 font-mono text-aegis-text"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">Tools</label>
+        <label className="text-aegis-faint">Tools</label>
         <div className="flex flex-wrap gap-3">
           {groups.map((group) => (
-            <label key={group} className="flex items-center gap-1.5">
+            <label key={group} className="flex items-center gap-1.5 text-aegis-text">
               <input
                 type="checkbox"
                 checked={form.toolGroups.includes(group)}
                 onChange={() => toggleGroup(group)}
+                className="accent-[color:var(--aegis-accent)]"
               />
               <span className="font-mono">{group}</span>
             </label>
@@ -405,23 +406,23 @@ export function TenantForm({
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-400">Domain notes</label>
+        <label className="text-aegis-faint">Domain notes</label>
         <textarea
           value={form.domainNotes}
           onChange={(e) => setForm((f) => ({ ...f, domainNotes: e.target.value }))}
           rows={3}
-          className="rounded border border-black/10 bg-transparent px-2 py-1 dark:border-white/10"
+          className="rounded border border-aegis-border bg-aegis-surface px-2 py-1 text-aegis-text"
         />
       </div>
 
-      {message && <p className="text-red-500">{message}</p>}
+      {message && <p className="text-aegis-danger">{message}</p>}
 
       <div className="flex gap-2">
         <button
           type="button"
           onClick={submit}
           disabled={saving || !form.name || !form.id || !idIsValid}
-          className="rounded border border-black/10 px-3 py-1 disabled:opacity-40 dark:border-white/10"
+          className="rounded-md bg-aegis-accent px-3 py-1 font-semibold text-aegis-accent-ink disabled:opacity-40"
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -429,7 +430,7 @@ export function TenantForm({
           type="button"
           onClick={onCancel}
           disabled={saving}
-          className="rounded border border-black/10 px-3 py-1 disabled:opacity-40 dark:border-white/10"
+          className="rounded-md border border-aegis-border px-3 py-1 text-aegis-dim disabled:opacity-40"
         >
           Cancel
         </button>

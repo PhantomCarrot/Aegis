@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Panel } from "@/components/ui/Panel";
 import { apiFetch } from "@/lib/api";
 
 type ToolInfo = {
@@ -29,13 +30,12 @@ export function ToolsPanel({
   enabledTools: string[] | null;
   onChangeEnabledTools: (names: string[] | null) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [tools, setTools] = useState<ToolInfo[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = () => {
-    if (!activeTenantId) return;
+    if (!activeTenantId || tools !== null) return;
     setLoading(true);
     apiFetch("/api/tools")
       .then(async (r) => {
@@ -48,12 +48,6 @@ export function ToolsPanel({
       })
       .catch((err) => setError(String(err)))
       .finally(() => setLoading(false));
-  };
-
-  const toggleOpen = () => {
-    const next = !open;
-    setOpen(next);
-    if (next && tools === null) load();
   };
 
   const allowedByConfig = (tools ?? []).filter((t) => t.enabled).map((t) => t.name);
@@ -78,58 +72,37 @@ export function ToolsPanel({
   };
 
   return (
-    <div className="rounded-lg border border-black/10 text-xs dark:border-white/10">
-      <button
-        type="button"
-        onClick={toggleOpen}
-        className="flex w-full items-center justify-between px-3 py-2 text-zinc-600 dark:text-zinc-300"
-      >
-        <span>🧰 Tools</span>
-        <span>{open ? "▲" : "▼"}</span>
-      </button>
-      {open && (
-        <div className="border-t border-black/10 px-3 py-2 dark:border-white/10">
-          {!activeTenantId && <p className="text-zinc-400">No active tenant</p>}
-          {loading && <p className="text-zinc-400">Loading…</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          <div className="flex flex-col gap-1.5">
-            {tools?.map((tool) => (
-              <div
-                key={tool.name}
-                className="rounded-md border border-black/10 px-2 py-1.5 dark:border-white/10"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={isChecked(tool.name)}
-                      disabled={!tool.enabled}
-                      onChange={() => toggleTool(tool.name)}
-                    />
-                    <span className="font-mono">{tool.name}</span>
-                    {tool.guarded && (
-                      <span
-                        title="Subject to guardrails — confirmation may be required"
-                        className="text-amber-500"
-                      >
-                        ⚠
-                      </span>
-                    )}
-                  </label>
-                  {!tool.enabled && (
-                    <span className="text-[10px] text-zinc-400">not allowed (tenant config)</span>
-                  )}
-                </div>
-                {tool.schema.function.description && (
-                  <p className="mt-1 text-zinc-500 dark:text-zinc-400">
-                    {tool.schema.function.description}
-                  </p>
+    <Panel eyebrow="Tools" category="settings" defaultOpen={false} onOpen={load}>
+      {!activeTenantId && <p className="text-xs text-aegis-faint">No active tenant</p>}
+      {loading && <p className="text-xs text-aegis-faint">Loading…</p>}
+      {error && <p className="text-xs text-aegis-danger">{error}</p>}
+      <div className="flex flex-col gap-1.5">
+        {tools?.map((tool) => (
+          <div key={tool.name} className="rounded-md border border-aegis-border bg-aegis-surface-2 px-2 py-1.5 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isChecked(tool.name)}
+                  disabled={!tool.enabled}
+                  onChange={() => toggleTool(tool.name)}
+                  className="accent-[color:var(--aegis-accent)]"
+                />
+                <span className="font-mono text-aegis-text">{tool.name}</span>
+                {tool.guarded && (
+                  <span title="Subject to guardrails — confirmation may be required" className="text-aegis-warn">
+                    ⚠
+                  </span>
                 )}
-              </div>
-            ))}
+              </label>
+              {!tool.enabled && <span className="text-[10px] text-aegis-faint">not allowed (tenant config)</span>}
+            </div>
+            {tool.schema.function.description && (
+              <p className="mt-1 text-aegis-dim">{tool.schema.function.description}</p>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+        ))}
+      </div>
+    </Panel>
   );
 }

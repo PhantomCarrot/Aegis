@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+/* Runtime-toggleable dark mode: `dark:` utilities are driven by a `.dark`
+   class on <html> (see hooks/useTheme.tsx + the inline script in
+   layout.tsx), not just prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens — two named directions, not a default palette:
+ * "Daylight Ops" (light) and "Slate Console" (dark). Every component reads
+ * these via the aegis-* utilities generated below, never a raw Tailwind
+ * color, so both themes and the runtime toggle stay centralized here.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --aegis-bg: #f5f7f9;
+  --aegis-surface: #ffffff;
+  --aegis-surface-2: #eef1f5;
+  --aegis-border: #dde3ea;
+  --aegis-text: #1a2130;
+  --aegis-dim: #667085;
+  --aegis-faint: #97a1b0;
+  --aegis-accent: #2f6fed;
+  --aegis-accent-ink: #ffffff;
+  --aegis-ok: #059669;
+  --aegis-warn: #b45309;
+  --aegis-warn-bg: #fef3e2;
+  --aegis-danger: #dc2626;
+  --aegis-danger-bg: #fdecec;
+  --aegis-cat-settings: #2f6fed;
+  --aegis-cat-rag: #7c3aed;
+  --aegis-cat-tenants: #6b7280;
+  color-scheme: light;
+}
+
+.dark {
+  --aegis-bg: #10141b;
+  --aegis-surface: #171d27;
+  --aegis-surface-2: #1d2430;
+  --aegis-border: #262f3d;
+  --aegis-text: #e7ebf1;
+  --aegis-dim: #8b96a8;
+  --aegis-faint: #56616f;
+  --aegis-accent: #5b8def;
+  --aegis-accent-ink: #071019;
+  --aegis-ok: #34d399;
+  --aegis-warn: #f0a94e;
+  --aegis-warn-bg: color-mix(in srgb, #f0a94e 16%, transparent);
+  --aegis-danger: #f4614f;
+  --aegis-danger-bg: color-mix(in srgb, #f4614f 16%, transparent);
+  --aegis-cat-settings: #5b8def;
+  --aegis-cat-rag: #a78bfa;
+  --aegis-cat-tenants: #8b96a8;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-aegis-bg: var(--aegis-bg);
+  --color-aegis-surface: var(--aegis-surface);
+  --color-aegis-surface-2: var(--aegis-surface-2);
+  --color-aegis-border: var(--aegis-border);
+  --color-aegis-text: var(--aegis-text);
+  --color-aegis-dim: var(--aegis-dim);
+  --color-aegis-faint: var(--aegis-faint);
+  --color-aegis-accent: var(--aegis-accent);
+  --color-aegis-accent-ink: var(--aegis-accent-ink);
+  --color-aegis-ok: var(--aegis-ok);
+  --color-aegis-warn: var(--aegis-warn);
+  --color-aegis-warn-bg: var(--aegis-warn-bg);
+  --color-aegis-danger: var(--aegis-danger);
+  --color-aegis-danger-bg: var(--aegis-danger-bg);
+  --color-aegis-cat-settings: var(--aegis-cat-settings);
+  --color-aegis-cat-rag: var(--aegis-cat-rag);
+  --color-aegis-cat-tenants: var(--aegis-cat-tenants);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--aegis-bg);
+  color: var(--aegis-text);
 }

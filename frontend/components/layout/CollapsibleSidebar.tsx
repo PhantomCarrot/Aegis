@@ -23,12 +23,12 @@ export function CollapsibleSidebar({
 
   if (!open) {
     return (
-      <div className={`flex flex-shrink-0 flex-col items-center py-4 ${borderSide} border-black/10 dark:border-white/10`}>
+      <div className={`flex flex-shrink-0 flex-col items-center bg-aegis-surface-2 py-4 ${borderSide} border-aegis-border`}>
         <button
           type="button"
           onClick={() => setOpen(true)}
           title={`Open ${title}`}
-          className="rounded-md p-1.5 text-sm text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100"
+          className="rounded-md p-1.5 text-sm text-aegis-faint hover:text-aegis-text"
         >
           {side === "left" ? "»" : "«"}
         </button>
@@ -38,17 +38,15 @@ export function CollapsibleSidebar({
 
   return (
     <div
-      className={`flex h-full min-h-0 w-72 flex-shrink-0 flex-col gap-5 overflow-y-auto px-4 py-6 ${borderSide} border-black/10 dark:border-white/10`}
+      className={`flex h-full min-h-0 w-72 flex-shrink-0 flex-col gap-3 overflow-y-auto bg-aegis-surface-2 px-4 py-6 ${borderSide} border-aegis-border`}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          {title}
-        </h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-aegis-dim">{title}</h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
           title="Collapse"
-          className="rounded p-1 text-sm text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100"
+          className="rounded p-1 text-sm text-aegis-faint hover:text-aegis-text"
         >
           {side === "left" ? "«" : "»"}
         </button>
