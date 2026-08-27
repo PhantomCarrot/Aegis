@@ -5,7 +5,28 @@ import { useCallback, useEffect, useState } from "react";
 import { Panel } from "@/components/ui/Panel";
 import { apiFetch } from "@/lib/api";
 
-type Status = { ready: boolean; points_count: number };
+type Status = { ready: boolean; points_count: number; generated_at: string | null };
+
+const RELATIVE_TIME_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ["year", 31536000],
+  ["month", 2592000],
+  ["week", 604800],
+  ["day", 86400],
+  ["hour", 3600],
+  ["minute", 60],
+];
+const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+/** "generated 3m ago"-style freshness label — no new dependency, Intl covers it. */
+function relativeTime(iso: string): string {
+  const diffSeconds = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+  for (const [unit, secondsInUnit] of RELATIVE_TIME_UNITS) {
+    if (diffSeconds >= secondsInUnit) {
+      return relativeTimeFormatter.format(-Math.round(diffSeconds / secondsInUnit), unit);
+    }
+  }
+  return diffSeconds < 5 ? "just now" : relativeTimeFormatter.format(-diffSeconds, "second");
+}
 
 export function RagStatusPanel({ activeTenantId }: { activeTenantId: string | null }) {
   const [status, setStatus] = useState<Status | null>(null);
@@ -48,7 +69,10 @@ export function RagStatusPanel({ activeTenantId }: { activeTenantId: string | nu
           className={"h-1.5 w-1.5 rounded-full " + (status?.ready ? "bg-aegis-ok" : "bg-aegis-faint")}
         />
         <span className="text-aegis-dim">
-          {status?.ready ? `${status.points_count} chunks indexed` : "empty index"}
+          {status?.ready
+            ? `${status.points_count} chunks indexed` +
+              (status.generated_at ? ` · generated ${relativeTime(status.generated_at)}` : "")
+            : "empty index"}
         </span>
         <button
           type="button"

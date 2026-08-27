@@ -99,6 +99,7 @@ async def run_agent_loop(
     history: list[dict],  # [{role, content}, ...] Ollama format — already converted by the router
     safety_mode: SafetyMode,
     model: str,
+    anonymizer: Anonymizer,  # owned by the router — one instance per chat turn, see app/routers/chat.py
     pending_approval: PendingApproval | None = None,
     extra_context: str = "",       # RAG context already retrieved by the router (RAG mode) — see docs/rag.md
     rag_sources: list[dict] | None = None,
@@ -108,9 +109,6 @@ async def run_agent_loop(
 
     if rag_sources:
         yield ev.RagSources(rag_sources)
-
-    anonymizer = Anonymizer()
-    anonymizer.start_turn()
 
     tools = get_enabled_tools(tenant, override_names=enabled_tool_names)
     tool_schemas = [tool_to_ollama_schema(t) for t in tools]

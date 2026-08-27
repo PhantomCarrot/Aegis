@@ -105,3 +105,52 @@ def test_turn_counter_tracks_secrets_found_in_current_turn():
     jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
     a.anonymize_result("run_command", {}, {"stdout": json.dumps({"token": jwt})})
     assert a.turn_count == 1
+
+
+def test_anonymize_text_redacts_secret_tokens_in_free_text():
+    a = Anonymizer()
+    jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+    text = f"The API token is {jwt} and it never expires."
+    result = a.anonymize_text(text)
+    assert jwt not in result
+    assert "[SECRET-1]" in result
+    assert "The API token is" in result and "and it never expires." in result
+
+
+def test_anonymize_text_reuses_placeholder_from_anonymize_result():
+    a = Anonymizer()
+    jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+    a.anonymize_result("run_command", {}, {"stdout": json.dumps({"token": jwt})})
+    result = a.anonymize_text(f"Reused token: {jwt}")
+    # Same secret, same turn — same placeholder, not a new [SECRET-2].
+    assert "[SECRET-1]" in result
+    assert len(a.reverse_map) == 1
+
+
+def test_anonymize_text_leaves_ordinary_text_alone():
+    a = Anonymizer()
+    text = "The demo namespace has 3 pods, all Running."
+    assert a.anonymize_text(text) == text
+
+
+def test_anonymize_text_root_mode_bypasses_anonymization():
+    a = Anonymizer()
+    jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+    text = f"token: {jwt}"
+    assert a.anonymize_text(text, safety_mode="root") == text
+
+
+def test_anonymize_text_redacts_kubectl_secret_data_block():
+    a = Anonymizer()
+    yaml_output = (
+        "apiVersion: v1\n"
+        "data:\n"
+        "  password: c3VwZXJzZWNyZXR2YWx1ZWJhc2U2NGVuY29kZWQ=\n"
+        "kind: Secret\n"
+        "metadata:\n"
+        "  name: foo\n"
+    )
+    result = a.anonymize_text(yaml_output)
+    assert "c3VwZXJzZWNyZXR2YWx1ZWJhc2U2NGVuY29kZWQ=" not in result
+    assert "[REDACTED]" in result
+    assert "name: foo" in result

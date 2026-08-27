@@ -1,6 +1,7 @@
 """POST /api/rag/generate, GET /api/rag/status — RAG pipeline. See docs/rag.md."""
 from __future__ import annotations
 
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -9,6 +10,7 @@ from app.agent.tools.registry import ToolContext
 from app.config.schema import TenantConfig
 from app.config.tenants import resolve_tenant
 from app.exec.factory import describe_executor, get_executor
+from app.logging_config import get_audit_logger
 from app.rag import docs_gen
 from app.rag.embeddings import EmbeddingError
 from app.rag.indexer import index_text
@@ -19,23 +21,38 @@ router = APIRouter(prefix="/api/rag", tags=["rag"], dependencies=[RequireAuth])
 
 _OVERVIEW_SOURCE_PATH = "cluster-overview.md"
 
+_audit = get_audit_logger()
+
 
 @router.post("/generate")
 async def generate(tenant: Annotated[TenantConfig, Depends(resolve_tenant)]) -> dict:
     """Scrapes the active tenant's cluster, writes a Markdown doc, and indexes it."""
+    started = time.monotonic()
     ctx = ToolContext(tenant=tenant, executor=get_executor(tenant), exec_target=describe_executor(tenant))
     markdown = await docs_gen.generate_overview(ctx)
 
     try:
-        chunks_indexed = await index_text(tenant, get_store(), _OVERVIEW_SOURCE_PATH, markdown)
+        chunks_indexed, generated_at = await index_text(tenant, get_store(), _OVERVIEW_SOURCE_PATH, markdown)
     except EmbeddingError as e:
+        duration_ms = round((time.monotonic() - started) * 1000)
+        _audit.info(
+            "rag_generate tenant=%s ok=%s chunks_indexed=0 duration_ms=%d",
+            tenant.id, False, duration_ms,
+        )
         return {"ok": False, "error": str(e)}
+
+    duration_ms = round((time.monotonic() - started) * 1000)
+    _audit.info(
+        "rag_generate tenant=%s ok=%s chunks_indexed=%d duration_ms=%d",
+        tenant.id, True, chunks_indexed, duration_ms,
+    )
 
     return {
         "ok": True,
         "source_path": _OVERVIEW_SOURCE_PATH,
         "chunks_indexed": chunks_indexed,
         "chars": len(markdown),
+        "generated_at": generated_at,
     }
 
 

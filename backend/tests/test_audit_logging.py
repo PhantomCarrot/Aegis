@@ -5,6 +5,7 @@ Doesn't test the exact format, just that the event is emitted.
 """
 import logging
 
+from app.agent.anonymizer import Anonymizer
 from app.agent.loop import run_agent_loop
 from app.config.schema import TenantConfig
 from app.logging_config import AUDIT_LOGGER_NAME
@@ -28,8 +29,15 @@ async def test_guardrail_decision_is_audit_logged(monkeypatch, caplog):
 
     tenant = TenantConfig(id="demo", name="Demo", tools_enabled=["run_command"])
 
+    anonymizer = Anonymizer()
+    anonymizer.start_turn()
+
     with caplog.at_level(logging.INFO, logger=AUDIT_LOGGER_NAME):
-        events = [e async for e in run_agent_loop(tenant, [{"role": "user", "content": "scale"}], "modify", "fake-model")]
+        events = [
+            e async for e in run_agent_loop(
+                tenant, [{"role": "user", "content": "scale"}], "modify", "fake-model", anonymizer
+            )
+        ]
 
     assert any(e.__class__.__name__ == "ApprovalRequired" for e in events)
     audit_records = [r for r in caplog.records if r.name == AUDIT_LOGGER_NAME]

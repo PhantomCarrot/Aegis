@@ -7,6 +7,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
+from app.agent.anonymizer import Anonymizer
 from app.agent.loop import PendingApproval, run_agent_loop
 from app.config.schema import TenantConfig
 from app.config.tenants import resolve_tenant
@@ -86,11 +87,21 @@ async def chat(
     model = body.get("model") or DEFAULT_MODEL
     mode = body.get("mode", "ops")  # "ops" | "rag" — see docs/rag.md
 
+    # One Anonymizer per chat turn, owned by the router (it already owns
+    # safety_mode/mode) — shared between RAG context redaction and tool
+    # result redaction so a secret seen in either place gets the same
+    # placeholder. See docs/security-model.md.
+    anonymizer = Anonymizer()
+    anonymizer.start_turn()
+
     extra_context = ""
     rag_sources: list[dict] = []
     if mode == "rag" and history and history[-1]["role"] == "user":
         try:
-            extra_context, rag_sources = await build_context(tenant, get_store(), history[-1]["content"])
+            extra_context, rag_sources = await build_context(
+                tenant, get_store(), history[-1]["content"],
+                anonymizer=anonymizer, safety_mode=safety_mode,
+            )
         except EmbeddingError:
             # Empty index/embeddings backend unavailable → continue in
             # silent ops mode rather than breaking the conversation.
@@ -100,7 +111,7 @@ async def chat(
     enabled_tool_names = set(enabled_tools) if enabled_tools is not None else None
 
     events = run_agent_loop(
-        tenant, history, safety_mode, model,
+        tenant, history, safety_mode, model, anonymizer,
         pending_approval=pending_approval,
         extra_context=extra_context,
         rag_sources=rag_sources,

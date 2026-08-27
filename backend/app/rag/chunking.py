@@ -17,6 +17,10 @@ _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
 DEFAULT_MAX_CHARS = 2000
 DEFAULT_OVERLAP_CHARS = 200
 
+# How far back _backoff_to_boundary is allowed to look for a space/newline
+# before giving up and falling back to the original hard cut.
+_BOUNDARY_LOOKBACK_CHARS = 100
+
 
 @dataclass
 class Chunk:
@@ -55,6 +59,22 @@ def _split_by_headings(markdown: str) -> list[tuple[list[str], str]]:
     return sections
 
 
+def _backoff_to_boundary(content: str, cut: int) -> int:
+    """
+    Nudges a hard character-count cut point back to the index of the
+    nearest space or newline within a lookback window — slicing
+    `content[:idx]` there never ends mid-word. Falls back to the original
+    `cut` unchanged if no boundary is found in the window (e.g. a single
+    token longer than the window) — never worse than a blind
+    character-count cut.
+    """
+    if cut <= 0 or cut >= len(content):
+        return cut
+    window_start = max(0, cut - _BOUNDARY_LOOKBACK_CHARS)
+    boundary = max(content.rfind(" ", window_start, cut), content.rfind("\n", window_start, cut))
+    return boundary if boundary != -1 else cut
+
+
 def chunk_markdown(
     markdown: str,
     *,
@@ -79,12 +99,20 @@ def chunk_markdown(
 
         start = 0
         while start < len(content):
-            end = start + max_chars
-            piece = content[start:end]
+            end = _backoff_to_boundary(content, start + max_chars)
+            # rstrip: when a boundary was found, `end` points AT the space
+            # itself (content[start:end] would keep it as a trailing char).
+            piece = content[start:end].rstrip()
             chunks.append(Chunk(text=f"{prefix}{piece}", heading_path=breadcrumb, chunk_index=idx))
             idx += 1
             if end >= len(content):
                 break
-            start = end - overlap_chars
+            # Guarded with max() so a small max_chars relative to
+            # overlap_chars/lookback can never stall progress.
+            start = _backoff_to_boundary(content, max(end - overlap_chars, start + 1))
+            # Skip past the boundary whitespace itself so the next chunk
+            # doesn't start mid-word (or start with a leading space).
+            while start < len(content) and content[start] in " \n":
+                start += 1
 
     return chunks

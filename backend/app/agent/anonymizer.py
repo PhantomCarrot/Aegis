@@ -134,6 +134,32 @@ class Anonymizer:
 
         return result
 
+    def anonymize_text(self, text: str, safety_mode: str = "readonly") -> str:
+        """
+        Redacts secret-looking tokens in free text (e.g. RAG chunks) before
+        it reaches the LLM. Reuses the same forward/reverse maps as
+        anonymize_result, so a secret already seen this turn in a tool
+        result gets the same placeholder here.
+        """
+        if not text:
+            return text
+        # In confirmed root mode, the user explicitly requested full access.
+        if safety_mode in ("root", "__confirmed__"):
+            return text
+
+        # kubectl secret `data:` blocks (base64 values) first, same logic as
+        # anonymize_result — RAG docs are generated from kubectl output, so
+        # this structure does show up in indexed chunks.
+        text = self._redact_kubectl_secret_data(text)
+
+        def _sub(match: re.Match) -> str:
+            token = match.group(0)
+            if self._is_secret_value(token):
+                return self._replace(token)
+            return token
+
+        return re.sub(r"\S+", _sub, text)
+
     def _redact_kubectl_secret_data(self, text: str) -> str:
         """
         Replaces base64 values in the (root-level) `data:` section of a

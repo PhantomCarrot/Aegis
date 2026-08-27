@@ -9,6 +9,10 @@ Aegis runs real commands against real infrastructure at an LLM's request — tha
 
 Status: fully implemented and verified end to end (backend + UI + real LLM) — `app/agent/anonymizer.py`, `app/agent/guardrails.py`, wired into `app/agent/loop.py`. `kubectl_get` is always-safe (never subject to the guardrail); `run_command` dynamically classifies the command it's given.
 
+## Anonymization
+
+One `Anonymizer` instance per chat turn (`app/routers/chat.py`), reused everywhere secrets can reach the LLM in that turn — not just tool results. In RAG mode, the text retrieved from the vector index goes through the same instance (`anonymize_text`, called from `app/rag/context.py`'s `build_context`) right before it's injected into the system prompt, so a secret already anonymized in a tool result this turn gets the same `[SECRET-N]` placeholder in RAG context too. This only applies at the point content reaches the LLM: `GET /api/rag/documents` (the sidebar's "Indexed content" browser) intentionally stays unredacted — it's the authenticated operator inspecting their own indexed infra, not the LLM. See [`rag.md`](rag.md#anonymization-at-retrieval-time) for why this happens at retrieval time rather than at indexing time.
+
 ## Anonymization — a concrete example
 
 A raw command result, before it's sent to the LLM:

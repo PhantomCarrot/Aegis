@@ -49,7 +49,7 @@ async def _fake_embed_texts(texts, *, model=None, ollama_url):
 def test_status_before_any_generation(client):
     r = client.get("/api/rag/status", headers=AUTH)
     assert r.status_code == 200
-    assert r.json() == {"ready": False, "points_count": 0}
+    assert r.json() == {"ready": False, "points_count": 0, "generated_at": None}
 
 
 def test_generate_scrapes_indexes_and_updates_status(client, monkeypatch):
@@ -65,10 +65,12 @@ def test_generate_scrapes_indexes_and_updates_status(client, monkeypatch):
     body = r.json()
     assert body["ok"] is True
     assert body["chunks_indexed"] >= 1
+    assert body["generated_at"]  # ISO timestamp, non-empty
 
     status = client.get("/api/rag/status", headers=AUTH).json()
     assert status["ready"] is True
     assert status["points_count"] == body["chunks_indexed"]
+    assert status["generated_at"] == body["generated_at"]
 
 
 def test_generate_reports_embedding_failure_without_crashing(client, monkeypatch):

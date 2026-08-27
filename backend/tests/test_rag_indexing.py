@@ -31,7 +31,7 @@ def _tenant(tenant_id: str = "demo") -> TenantConfig:
 
 async def test_status_reports_not_ready_when_no_collection(store):
     status = await store.status("demo")
-    assert status == {"ready": False, "points_count": 0}
+    assert status == {"ready": False, "points_count": 0, "generated_at": None}
 
 
 async def test_upsert_creates_collection_and_status_reflects_it(store):
@@ -42,7 +42,19 @@ async def test_upsert_creates_collection_and_status_reflects_it(store):
     )
     assert n == 1
     status = await store.status("demo")
-    assert status == {"ready": True, "points_count": 1}
+    # No generated_at in the payload here (built by hand, not via
+    # index_text) — status() surfaces whatever's on the point, or None.
+    assert status == {"ready": True, "points_count": 1, "generated_at": None}
+
+
+async def test_status_surfaces_generated_at_from_chunk_payload(store):
+    await store.upsert_chunks(
+        "demo", "doc.md",
+        [{"text": "hello", "heading_path": "", "chunk_index": 0, "generated_at": "2026-01-01T00:00:00+00:00"}],
+        [_fake_vector(1)],
+    )
+    status = await store.status("demo")
+    assert status["generated_at"] == "2026-01-01T00:00:00+00:00"
 
 
 async def test_reindexing_same_source_overwrites_not_duplicates(store):
@@ -96,6 +108,40 @@ async def test_search_returns_scored_payloads(store):
 
 async def test_search_on_missing_collection_returns_empty(store):
     assert await store.search("does-not-exist", _fake_vector(1)) == []
+
+
+async def test_hybrid_search_ranking_differs_from_dense_only():
+    """
+    Two chunks: one shares only an exact keyword with the query (weak dense
+    similarity), one is dense-close but shares no keyword. Hybrid search
+    (dense+sparse RRF) should rank the keyword match higher than dense-only
+    search does — proving sparse actually contributes, not just present.
+    """
+    from app.rag.sparse_embeddings import embed_query_sparse, embed_texts_sparse
+
+    store = QdrantStore(client=AsyncQdrantClient(location=":memory:"))
+    keyword_chunk = {"text": "The kubeconfig secret rotation runbook.", "heading_path": "", "chunk_index": 0}
+    dense_close_chunk = {"text": "Unrelated but numerically similar vector.", "heading_path": "", "chunk_index": 1}
+
+    query = "kubeconfig secret rotation"
+    query_vector = _fake_vector(1)
+    # keyword_chunk is dense-FAR from the query; dense_close_chunk is dense-NEAR.
+    keyword_vector = _fake_vector(50)
+    dense_close_vector = _fake_vector(1)
+
+    sparse_vectors = embed_texts_sparse([keyword_chunk["text"], dense_close_chunk["text"]])
+    await store.upsert_chunks(
+        "demo", "runbook.md", [keyword_chunk], [keyword_vector], [sparse_vectors[0]]
+    )
+    await store.upsert_chunks(
+        "demo", "other.md", [dense_close_chunk], [dense_close_vector], [sparse_vectors[1]]
+    )
+
+    dense_only_hits = await store.search("demo", query_vector, top_k=2)
+    assert dense_only_hits[0]["text"] == dense_close_chunk["text"]  # dense-only: numeric closeness wins
+
+    hybrid_hits = await store.search("demo", query_vector, embed_query_sparse(query), top_k=2)
+    assert hybrid_hits[0]["text"] == keyword_chunk["text"]  # hybrid: exact keyword match wins
 
 
 async def test_list_chunks_returns_all_payloads(store):
@@ -161,11 +207,13 @@ async def test_index_text_chunks_embeds_and_upserts(store, monkeypatch):
     monkeypatch.setattr(indexer_module, "embed_texts", fake_embed_texts)
 
     md = "# Overview\n\nIntro.\n\n## Pods\n\nList of pods.\n"
-    n = await indexer_module.index_text(_tenant(), store, "overview.md", md)
+    n, generated_at = await indexer_module.index_text(_tenant(), store, "overview.md", md)
 
     assert n == 2  # two sections → two chunks
+    assert generated_at is not None
     status = await store.status("demo")
     assert status["points_count"] == 2
+    assert status["generated_at"] == generated_at
 
 
 async def test_index_text_empty_document_indexes_nothing(store, monkeypatch):
@@ -177,6 +225,26 @@ async def test_index_text_empty_document_indexes_nothing(store, monkeypatch):
 
     monkeypatch.setattr(indexer_module, "embed_texts", fake_embed_texts)
 
-    n = await indexer_module.index_text(_tenant(), store, "empty.md", "")
+    n, generated_at = await indexer_module.index_text(_tenant(), store, "empty.md", "")
     assert n == 0
+    assert generated_at is None
     assert called["n"] == 0  # never called — short-circuits before embedding
+
+
+async def test_index_text_computes_sparse_vectors(store, monkeypatch):
+    async def fake_embed_texts(texts, *, model=None, ollama_url):
+        return [_fake_vector(i) for i in range(len(texts))]
+
+    monkeypatch.setattr(indexer_module, "embed_texts", fake_embed_texts)
+
+    md = "# Overview\n\nThe demo namespace has 3 pods running nginx.\n"
+    n, _generated_at = await indexer_module.index_text(_tenant(), store, "overview.md", md)
+    assert n == 1
+
+    # A keyword-exact query ("nginx") should retrieve this chunk via the
+    # sparse side of hybrid search even with an unrelated dense vector.
+    from app.rag.sparse_embeddings import embed_query_sparse
+
+    hits = await store.search("demo", _fake_vector(99), embed_query_sparse("nginx"), top_k=3)
+    assert len(hits) == 1
+    assert "nginx" in hits[0]["text"]
