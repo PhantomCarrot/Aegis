@@ -11,7 +11,7 @@ This separation exists because the frontend needs to be hostable anywhere (inclu
 
 ## Overview
 
-![Aegis architecture: a chat request flows from the browser through the Next.js proxy to the self-hosted backend, which loops with the LLM provider for tool calls but is the only component that ever executes a command — locally or over SSH to a configured host.](assets/architecture.svg)
+![Aegis architecture: a chat request flows from the browser through the Next.js proxy to the self-hosted backend, which loops with the LLM provider for tool calls but is the only component that ever executes a command — locally or over SSH to a configured host.](assets/architecture-drawio.svg)
 
 The numbered flow in one pass: **1–2** the browser's request reaches the backend through the frontend's proxy, which is the only thing that ever holds the bearer token. **3–4** the agent loop sends the conversation and tool schemas to whichever LLM provider the tenant is configured for ([`llm-providers.md`](llm-providers.md)); the LLM only ever replies with text or a `tool_call` — it has no path to your infrastructure. **5–6** a tool call is checked against the active safety mode before Exec runs anything, and its result is anonymized before it goes anywhere near the LLM again ([`security-model.md`](security-model.md)). **7** the loop repeats — steps 3–7 — until the LLM has enough to answer. **8** the final answer streams back the way it came.
 
