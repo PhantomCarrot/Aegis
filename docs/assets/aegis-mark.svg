@@ -1,5 +1,6 @@
-<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aegis mark: a shield with a terminal prompt">
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aegis mark: a shield with a code-bracketed infinity loop and a spark">
   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#2f6fed"/>
-  <path d="M8.6 10.2l2.6 2.3-2.6 2.3" fill="none" stroke="#eef4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <line x1="12.4" y1="14.8" x2="15.4" y2="14.8" stroke="#eef4ff" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M9.3 10.6l-1.9 2.3 1.9 2.3M14.7 10.6l1.9 2.3-1.9 2.3" fill="none" stroke="#eef4ff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="12" y="15.6" text-anchor="middle" font-family="Georgia, serif" font-size="5.6" font-weight="700" fill="#eef4ff">&#8734;</text>
+  <path d="M12 9.9l.5 1.05 1.05.5-1.05.5-.5 1.05-.5-1.05-1.05-.5 1.05-.5z" fill="#ffd166"/>
 </svg>
