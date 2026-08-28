@@ -8,11 +8,7 @@ A "tool" is a function the LLM can call during the conversation — `kubectl_get
 2. **`tenant.tools_enabled`** (`config/tenants.yaml`): the upper bound for this specific tenant — groups (`kubectl`, `argocd`) or precise names (`kubectl_get`). Set by the operator, not editable from the UI.
 3. **Runtime restriction** (`enabledTools` sent by the frontend on every `/api/chat` request): lets you temporarily disable some tools for a given conversation, from the UI's **⚙️ Settings** panel. It can **never widen** what (2) allows — only narrow it.
 
-```mermaid
-flowchart LR
-    A[Global registry<br/>every known tool] -->|tenant.tools_enabled| B[Allowed for this tenant]
-    B -->|enabledTools UI, at runtime| C[Actually active<br/>for this request]
-```
+![Tool activation funnel: the global tool registry is narrowed by tenant.tools_enabled, then narrowed again at runtime by enabledTools from the UI — each step can only shrink what's callable, never grow it.](assets/tools-drawio.svg)
 
 ## The security boundary
 

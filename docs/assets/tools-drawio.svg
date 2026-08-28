@@ -1,0 +1,49 @@
+<svg viewBox="0 0 1000 290" xmlns="http://www.w3.org/2000/svg" role="img"
+     style="color-scheme: light dark;"
+     aria-label="Tool activation funnel: the global tool registry is narrowed by tenant.tools_enabled, then narrowed again at runtime by enabledTools from the UI — each step can only shrink what's callable, never grow it.">
+<title>Aegis tool activation funnel</title>
+<defs>
+<marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#0969da, #56a8ff);"/></marker>
+<marker id="tri-blue" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#0969da, #56a8ff);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#9a6700, #bb8f37);"/></marker>
+<marker id="tri-amber" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#9a6700, #bb8f37);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#1b7c83, #52a5ac);"/></marker>
+<marker id="tri-teal" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#8250df, #af84ff);"/></marker>
+<marker id="tri-purple" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#8250df, #af84ff);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#1a7f37, #57ae70);"/></marker>
+<marker id="tri-green" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-pink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#bf3989, #e990c7);"/></marker>
+<marker id="tri-pink" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#bf3989, #e990c7);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#57606a, #969da6);"/></marker>
+<marker id="tri-gray" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#57606a, #969da6);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+</defs>
+<rect x="0" y="0" width="1000" height="290" style="fill:light-dark(#f6f8fa, #17191b);"/>
+<g id="registry">
+<rect x="40" y="90" width="260" height="90" rx="12" ry="12" style="fill:light-dark(#eaeef2, #21262d);stroke:light-dark(#57606a, #969da6);stroke-width:1.5;"/>
+<text x="170.0" y="123.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">Global registry</text>
+<text x="170.0" y="140.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">every known tool</text>
+<text x="170.0" y="157.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">agent/tools/registry.py</text>
+</g>
+<g id="allowed">
+<rect x="380" y="90" width="260" height="90" rx="12" ry="12" style="fill:light-dark(#fff8c5, #221c00);stroke:light-dark(#9a6700, #bb8f37);stroke-width:1.5;"/>
+<text x="510.0" y="123.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">Allowed for this tenant</text>
+<text x="510.0" y="140.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">tenant.tools_enabled</text>
+<text x="510.0" y="157.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">set by the operator</text>
+</g>
+<g id="active">
+<rect x="720" y="90" width="240" height="90" rx="12" ry="12" style="fill:light-dark(#ddf4ff, #0e222b);stroke:light-dark(#0969da, #56a8ff);stroke-width:1.5;"/>
+<text x="840.0" y="123.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">Actually active</text>
+<text x="840.0" y="140.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">enabledTools (UI), runtime</text>
+<text x="840.0" y="157.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">can only narrow, never widen</text>
+</g>
+<path d="M 300.0 135.0 Q 340.0 95.0 380.0 135.0" fill="none" style="stroke:light-dark(#9a6700, #bb8f37);stroke-width:1.8;" marker-end="url(#arrow-amber)"/>
+<text x="340.0" y="87.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#9a6700, #bb8f37);">∩ tenant.tools_enabled</text>
+<g id="a1-badge"><circle cx="340.0" cy="69.0" r="11" style="fill:light-dark(#9a6700, #bb8f37);"/><text x="340.0" y="73.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">1</text></g>
+<path d="M 640.0 135.0 Q 680.0 95.0 720.0 135.0" fill="none" style="stroke:light-dark(#0969da, #56a8ff);stroke-width:1.8;" marker-end="url(#arrow-blue)"/>
+<text x="680.0" y="87.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#0969da, #56a8ff);">∩ enabledTools (UI)</text>
+<g id="a2-badge"><circle cx="680.0" cy="69.0" r="11" style="fill:light-dark(#0969da, #56a8ff);"/><text x="680.0" y="73.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">2</text></g>
+<rect x="210" y="220" width="580" height="45" rx="10" ry="10" style="fill:light-dark(#dafbe1, #08250e);stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.5;"/>
+<text x="500.0" y="241" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11.5px;font-weight:700;fill:light-dark(#1a7f37, #57ae70);">Intersection, never union</text>
+<text x="500.0" y="258" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">get_enabled_tools() narrows at each step — the loop rechecks it too, even if the LLM hallucinates a call</text>
+</svg>

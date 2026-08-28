@@ -1,0 +1,69 @@
+<svg viewBox="0 0 1040 806" xmlns="http://www.w3.org/2000/svg" role="img"
+     style="color-scheme: light dark;"
+     aria-label="SSE streaming sequence for a typical text-only chat turn: the agent loop yields internal events (Start, TextStart, repeated TextDelta, TextEnd, Finish) that the protocol encoder translates one-to-one into AI SDK UI Message Stream SSE events sent to useChat on the frontend, ending with a [DONE] marker.">
+<title>Aegis SSE streaming sequence</title>
+<defs>
+<marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#0969da, #56a8ff);"/></marker>
+<marker id="tri-blue" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#0969da, #56a8ff);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#9a6700, #bb8f37);"/></marker>
+<marker id="tri-amber" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#9a6700, #bb8f37);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#1b7c83, #52a5ac);"/></marker>
+<marker id="tri-teal" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#8250df, #af84ff);"/></marker>
+<marker id="tri-purple" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#8250df, #af84ff);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#1a7f37, #57ae70);"/></marker>
+<marker id="tri-green" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-pink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#bf3989, #e990c7);"/></marker>
+<marker id="tri-pink" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#bf3989, #e990c7);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+<marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#57606a, #969da6);"/></marker>
+<marker id="tri-gray" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="12" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 13 5 L 1 9 Z" style="fill:light-dark(#f6f8fa, #17191b);stroke:light-dark(#57606a, #969da6);stroke-width:1.4;stroke-linejoin:round;"/></marker>
+</defs>
+<rect x="0" y="0" width="1040" height="806" style="fill:light-dark(#f6f8fa, #17191b);"/>
+<g id="l-agent">
+<rect x="35.0" y="30" width="230" height="60" rx="12" ry="12" style="fill:light-dark(#dafbe1, #08250e);stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.5;"/>
+<text x="150.0" y="56.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">AgentLoop</text>
+<text x="150.0" y="73.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">agent/loop.py</text>
+</g>
+<line x1="150" y1="90" x2="150" y2="786" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.2;stroke-dasharray:4 4;opacity:0.55;"/>
+<g id="l-enc">
+<rect x="405.0" y="30" width="230" height="60" rx="12" ry="12" style="fill:light-dark(#d8f6f6, #0c2525);stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.5;"/>
+<text x="520.0" y="56.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">Encoder</text>
+<text x="520.0" y="73.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">stream/aisdk_protocol.py</text>
+</g>
+<line x1="520" y1="90" x2="520" y2="786" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.2;stroke-dasharray:4 4;opacity:0.55;"/>
+<g id="l-ui">
+<rect x="775.0" y="30" width="230" height="60" rx="12" ry="12" style="fill:light-dark(#ddf4ff, #0e222b);stroke:light-dark(#0969da, #56a8ff);stroke-width:1.5;"/>
+<text x="890.0" y="56.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">useChat</text>
+<text x="890.0" y="73.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">frontend</text>
+</g>
+<line x1="890" y1="90" x2="890" y2="786" style="stroke:light-dark(#0969da, #56a8ff);stroke-width:1.2;stroke-dasharray:4 4;opacity:0.55;"/>
+<line x1="150.0" y1="126.0" x2="520.0" y2="126.0" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.6;" marker-end="url(#arrow-green)"/>
+<text x="335.0" y="118.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1a7f37, #57ae70);">Start()</text>
+<line x1="520.0" y1="174.0" x2="890.0" y2="174.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="166.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">start</text>
+<line x1="520.0" y1="222.0" x2="890.0" y2="222.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="214.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">start-step</text>
+<line x1="150.0" y1="270.0" x2="520.0" y2="270.0" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.6;" marker-end="url(#arrow-green)"/>
+<text x="335.0" y="262.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1a7f37, #57ae70);">TextStart(id)</text>
+<line x1="520.0" y1="318.0" x2="890.0" y2="318.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="310.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">text-start</text>
+<line x1="150.0" y1="388.0" x2="520.0" y2="388.0" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.6;" marker-end="url(#arrow-green)"/>
+<text x="335.0" y="380.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1a7f37, #57ae70);">TextDelta(id, delta)</text>
+<line x1="520.0" y1="436.0" x2="890.0" y2="436.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="428.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">text-delta</text>
+<rect x="60" y="362" width="870" height="112" fill="none" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.4;stroke-dasharray:3 3;"/>
+<path d="M 60 362 h 119 v 18 l -10 -7 h -109 z" style="fill:light-dark(#1a7f37, #57ae70);"/>
+<text x="69" y="377" style="font-family:'Courier New',monospace;font-size:10px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">loop: LLM deltas</text>
+<line x1="150.0" y1="498.0" x2="520.0" y2="498.0" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.6;" marker-end="url(#arrow-green)"/>
+<text x="335.0" y="490.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1a7f37, #57ae70);">TextEnd()</text>
+<line x1="520.0" y1="546.0" x2="890.0" y2="546.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="538.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">text-end</text>
+<line x1="150.0" y1="594.0" x2="520.0" y2="594.0" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.6;" marker-end="url(#arrow-green)"/>
+<text x="335.0" y="586.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1a7f37, #57ae70);">Finish()</text>
+<line x1="520.0" y1="642.0" x2="890.0" y2="642.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="634.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">finish-step</text>
+<line x1="520.0" y1="690.0" x2="890.0" y2="690.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="682.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">finish</text>
+<line x1="520.0" y1="738.0" x2="890.0" y2="738.0" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.6;" marker-end="url(#arrow-teal)"/>
+<text x="705.0" y="730.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;fill:light-dark(#1b7c83, #52a5ac);">[DONE]</text>
+</svg>

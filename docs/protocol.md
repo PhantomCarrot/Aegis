@@ -29,28 +29,7 @@ x-accel-buffering: no
 
 **Typical turn sequence** (text only):
 
-```mermaid
-sequenceDiagram
-    participant AgentLoop as agent/loop.py
-    participant Enc as stream/aisdk_protocol.py
-    participant UI as useChat (frontend)
-
-    AgentLoop->>Enc: Start()
-    Enc->>UI: data: {"type":"start"}
-    Enc->>UI: data: {"type":"start-step"}
-    AgentLoop->>Enc: TextStart(id)
-    Enc->>UI: data: {"type":"text-start","id":...}
-    loop LLM deltas
-        AgentLoop->>Enc: TextDelta(id, delta)
-        Enc->>UI: data: {"type":"text-delta","id":...,"delta":...}
-    end
-    AgentLoop->>Enc: TextEnd(id)
-    Enc->>UI: data: {"type":"text-end","id":...}
-    AgentLoop->>Enc: Finish()
-    Enc->>UI: data: {"type":"finish-step"}
-    Enc->>UI: data: {"type":"finish"}
-    Enc->>UI: data: [DONE]
-```
+![SSE streaming sequence for a typical text-only chat turn: the agent loop yields internal events (Start, TextStart, repeated TextDelta, TextEnd, Finish) that the protocol encoder translates one-to-one into AI SDK UI Message Stream SSE events sent to useChat on the frontend, ending with a [DONE] marker.](assets/protocol-drawio.svg)
 
 **With a tool call**: `tool-input-available` (with `"dynamic": true` — our tools are defined server-side only, never declared to the client, so rendered as `DynamicToolUIPart`) then `tool-output-available` or `tool-output-error`, before resuming text if the LLM replies after the result.
 

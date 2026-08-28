@@ -60,19 +60,7 @@ Implementation: [`backend/app/config/tenants.py`](../backend/app/config/tenants.
 
 The backend keeps **no mutable global variable** for "the active tenant" — that would break the moment two tabs/sessions point at different tenants at the same time. Instead, every request carries the target tenant in an `X-Tenant-Id` header:
 
-```mermaid
-sequenceDiagram
-    participant UI as Browser (TenantProvider)
-    participant Proxy as Next.js Proxy
-    participant API as FastAPI Backend
-
-    UI->>UI: switchTenant("acme-corp")<br/>writes to localStorage
-    UI->>Proxy: GET /api/backend/api/ping<br/>(forwards all browser headers)
-    Note over Proxy: the browser sends X-Tenant-Id directly,<br/>the proxy has nothing special to do here
-    Proxy->>API: GET /api/ping<br/>Authorization: Bearer ...<br/>X-Tenant-Id: acme-corp
-    API->>API: resolve_tenant() reads the header,<br/>falls back to default_tenant if absent
-    API-->>UI: { tenant: { id: "acme-corp", ... } }
-```
+![Tenant switch sequence: the browser writes the chosen tenant to localStorage and sends X-Tenant-Id on every request; the Next.js proxy forwards it unchanged; the FastAPI backend's resolve_tenant() reads the header, falling back to the default tenant if it's absent, and returns the resolved tenant.](assets/multi-tenant-drawio.svg)
 
 On the frontend side, this choice has a direct consequence on the React architecture: the active tenant must live in a **shared Context** (`TenantProvider`, see [`frontend/hooks/useTenant.tsx`](../frontend/hooks/useTenant.tsx)) rather than a local hook called independently by each component — two independent instances of "the same" logic would diverge the moment one switches without the other knowing. `frontend/lib/api.ts` reads the active tenant from `localStorage` and injects it as a header on every `apiFetch()` call.
 

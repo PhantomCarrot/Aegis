@@ -113,22 +113,7 @@ For an instance with no public IP, `gcloud compute start-iap-tunnel <instance-na
 
 One interface, two implementations, no other code in the project calls `subprocess` directly:
 
-```mermaid
-classDiagram
-    class CommandExecutor {
-        <<abstract>>
-        +run(command, env, timeout, shell) ExecResult
-    }
-    class LocalExecutor {
-        +run(...) local subprocess
-    }
-    class SSHExecutor {
-        -reused SSH connection
-        +run(...) remote execution
-    }
-    CommandExecutor <|-- LocalExecutor
-    CommandExecutor <|-- SSHExecutor
-```
+![CommandExecutor is an interface implemented by two classes: LocalExecutor, running a subprocess on the backend's own machine, and SSHExecutor, running commands on a remote host over a reused SSH connection. get_executor(tenant) picks the right one from the tenant's exec.mode.](assets/execution-model-drawio.svg)
 
 - [`backend/app/exec/base.py`](../backend/app/exec/base.py) — `CommandExecutor` interface + `ExecResult` (stdout/stderr/returncode/error).
 - [`backend/app/exec/local.py`](../backend/app/exec/local.py) — `LocalExecutor`, local asyncio subprocess (argv list or `shell=True` for pipes/redirections).
