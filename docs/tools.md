@@ -33,6 +33,7 @@ It's not just a matter of which schemas get sent to the LLM: the agent loop (`ap
       "name": "run_command",
       "enabled": true,
       "guarded": true,
+      "available": true,
       "schema": {
         "type": "function",
         "function": {
@@ -49,6 +50,7 @@ It's not just a matter of which schemas get sent to the LLM: the agent loop (`ap
 
 - `enabled`: allowed by `tenant.tools_enabled` (bound (2) above — not yet narrowed by any runtime `enabledTools`, which is scoped to a conversation, not the config).
 - `guarded`: subject to guardrails (`classify` is not `None`, see [`security-model.md`](security-model.md)) — `kubectl_get` isn't (always-safe), `run_command` is (dynamic command classification).
+- `available`: the tool's underlying CLI binary was actually found (`command -v {binary}`) on the tenant's resolved executor — local or the configured SSH host. Distinct from `enabled`, which is config-only and has no idea what's actually installed where. Probed per binary, not per tool (`argocd_app_list`/`argocd_app_status` share `kubectl_get`'s `kubectl` binary, since they run through `kubectl get applications` rather than the `argocd` CLI — see the Cloud CLI providers section below for `cloud_cli`'s own equivalent), cached ~60s (`app/agent/tools/availability.py`). `run_command` has no fixed binary to check and is always `true`. `ToolsPanel.tsx` disables a checkbox and shows a warning when a tool is `enabled` but not `available` — a state you'd otherwise only discover by actually calling the tool and getting a confusing failure.
 - `schema`: this tool's canonical schema (`tool_to_ollama_schema()`, the same function used by `app/agent/loop.py`) — named for the Ollama-shaped function-calling format it matches, which happens to already be OpenAI-compatible, so LM Studio gets it unchanged; only AirLLM's `_tools_instructions` (`app/stream/airllm_provider.py`) turns it into prompt text instead, since AirLLM has no native function-calling. Useful for understanding why a model does (or doesn't) pick a given tool, regardless of which provider the tenant actually runs.
 - `groups` (top-level, not per-tool): the identifiers `tenant.tools_enabled` actually accepts in `tenants.yaml` — named groups (`kubectl`, `argocd`) plus any standalone tool not part of one (`cloud_cli`, `run_command`), from `ui_tool_groups()` in `app/agent/tools/registry.py`. The tenant-administration UI's tools checklist reads this list directly rather than hardcoding it — see [`multi-tenant.md`](multi-tenant.md#editing-tenants-without-touching-yaml).
 

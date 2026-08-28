@@ -6,31 +6,40 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
+from app.agent.tools.availability import tools_availability
 from app.agent.tools.registry import _ALL_TOOLS, tenant_allowed_tool_names, tool_to_ollama_schema, ui_tool_groups
 from app.config.schema import TenantConfig
 from app.config.tenants import resolve_tenant
+from app.exec.factory import get_executor
 from app.security.auth import RequireAuth
 
 router = APIRouter(prefix="/api", tags=["tools"], dependencies=[RequireAuth])
 
 
 @router.get("/tools")
-def list_tools(tenant: Annotated[TenantConfig, Depends(resolve_tenant)]) -> dict:
+async def list_tools(tenant: Annotated[TenantConfig, Depends(resolve_tenant)]) -> dict:
     """
     Every tool known to the backend, with for each:
     - `enabled`: allowed by `tenant.tools_enabled` (the upper bound — what
       the UI's runtime toggle can restrict but never exceed)
     - `guarded`: subject to guardrails (classify is not None), e.g. run_command
+    - `available`: its underlying CLI binary was actually found on the
+      tenant's resolved executor (cached ~60s) — distinct from `enabled`,
+      which is config-only and has no idea what's actually installed where.
+      See app/agent/tools/availability.py.
     - `schema`: the exact JSON representation sent to Ollama for this tool
       (function-calling), so the operator can inspect it as-is.
     """
     allowed = tenant_allowed_tool_names(tenant)
+    executor = get_executor(tenant)
+    availability = await tools_availability(tenant, executor, list(_ALL_TOOLS.keys()))
     return {
         "tools": [
             {
                 "name": name,
                 "enabled": name in allowed,
                 "guarded": tool.classify is not None,
+                "available": availability.get(name, True),
                 "schema": tool_to_ollama_schema(tool),
             }
             for name, tool in sorted(_ALL_TOOLS.items())

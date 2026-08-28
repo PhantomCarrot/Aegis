@@ -17,7 +17,9 @@ __all__ = [
     "get_enabled_tools",
     "get_tool",
     "tenant_allowed_tool_names",
+    "tool_group",
     "tool_to_ollama_schema",
+    "tools_in_group",
     "ui_tool_groups",
 ]
 
@@ -63,6 +65,24 @@ def get_enabled_tools(tenant: TenantConfig, override_names: set[str] | None = No
 
 def get_tool(name: str) -> Tool | None:
     return _ALL_TOOLS.get(name)
+
+
+def tools_in_group(group: str) -> set[str]:
+    """Tool names belonging to a UI group — same group-or-precise-name
+    resolution as tenant_allowed_tool_names, for a single group."""
+    return _TOOL_GROUPS.get(group, {group}) & _ALL_TOOLS.keys()
+
+
+def tool_group(name: str) -> str | None:
+    """The UI group a tool name belongs to — its own name if it's
+    ungrouped (a singleton group of itself, e.g. "cloud_cli",
+    "run_command"), or None if it isn't a known tool at all. Used by
+    app/agent/tools/availability.py to know which binary a given tool
+    depends on."""
+    for group, names in _TOOL_GROUPS.items():
+        if name in names:
+            return group
+    return name if name in _ALL_TOOLS else None
 
 
 def ui_tool_groups() -> list[str]:

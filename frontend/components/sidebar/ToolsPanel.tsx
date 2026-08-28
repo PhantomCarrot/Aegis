@@ -9,6 +9,7 @@ type ToolInfo = {
   name: string;
   enabled: boolean; // allowed by tenant config (upper bound, see docs/tools.md)
   guarded: boolean; // subject to guardrails (confirmation may be required)
+  available: boolean; // its underlying CLI binary was actually found on the tenant's executor
   schema: { type: string; function: { name: string; description: string; parameters: unknown } };
 };
 
@@ -84,7 +85,7 @@ export function ToolsPanel({
                 <input
                   type="checkbox"
                   checked={isChecked(tool.name)}
-                  disabled={!tool.enabled}
+                  disabled={!tool.enabled || !tool.available}
                   onChange={() => toggleTool(tool.name)}
                   className="accent-[color:var(--aegis-accent)]"
                 />
@@ -94,8 +95,16 @@ export function ToolsPanel({
                     ⚠
                   </span>
                 )}
+                {tool.enabled && !tool.available && (
+                  <span title="Its CLI binary wasn't found on this tenant's executor" className="text-aegis-danger">
+                    🚫
+                  </span>
+                )}
               </label>
               {!tool.enabled && <span className="text-[10px] text-aegis-faint">not allowed (tenant config)</span>}
+              {tool.enabled && !tool.available && (
+                <span className="text-[10px] text-aegis-faint">binary unavailable</span>
+              )}
             </div>
             {tool.schema.function.description && (
               <p className="mt-1 text-aegis-dim">{tool.schema.function.description}</p>
