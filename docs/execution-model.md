@@ -29,6 +29,8 @@ tenants:
 
 `certificate_path` is for setups using short-lived certificate-based auth instead of a static key — e.g. Azure AD via `az ssh config`, or a Vault SSH secrets engine. The certificate is only checked at connection time, not per command, so a session opened before the certificate expires stays valid; refreshing the file in place (same path, new content, however that's done outside Aegis) is picked up on the next reconnect, no restart needed.
 
+`key_path`/`certificate_path`/`known_hosts_path` are read from **whichever machine actually runs the backend process** — same rule as `kubeconfig_dir` below. Running the backend via the Docker quickstart (`./quickstart.sh`)? Those paths are resolved *inside the container*, which only sees `./config` — not your `~/.ssh`, and definitely not an OS-managed temp directory like the one `az ssh config` writes ephemeral key material to on some machines/extension versions (see the Azure section below). A tenant whose paths live outside what the container can see fails to connect entirely — every tool that tenant has enabled correctly shows as unavailable in the UI (see [`tools.md`](tools.md#inspecting-tool-configuration)), because the connection genuinely doesn't work there, not because of a bug in the check. If that's your setup, run the backend directly on the host instead (see README.md's "Developing locally, without Docker") rather than trying to make the container see paths that move around.
+
 `exec.mode` can be set in `config/global.yaml` (a default for all tenants) and overridden per tenant in `config/tenants.yaml` — see [`multi-tenant.md`](multi-tenant.md).
 
 ## SSH exec — connecting to a real box, by environment
