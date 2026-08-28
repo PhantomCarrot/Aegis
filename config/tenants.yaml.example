@@ -11,6 +11,9 @@ tenants:
     name: "Demo"
     # exec.mode absent → inherits defaults.exec.mode (see global.yaml)
     kubeconfig_dir: "~/.kube/aegis/demo"
+    # cloud_provider: "az"  # only provider implemented today — see docs/tools.md
+    # terraform_dir: "~/infra/terraform"  # optional — enables Terraform state
+    #   scraping in RAG generate(), see docs/rag.md
     tools_enabled: [kubectl, argocd, cloud_cli, run_command]
     domain_notes: "" # free-form — naming conventions, reminders specific to this tenant
 

@@ -128,6 +128,16 @@ class TenantConfig(BaseModel):
     # tenants would leak one tenant's kubeconfig to another as soon as
     # neither specifies it.
     kubeconfig_dir: str = ""
+    # None = Terraform state scraping disabled for this tenant (most won't
+    # use it — unlike kubeconfig_dir, there's no sane directory to guess as
+    # a default). A path on the machine that actually runs the command
+    # (local, or the SSH host for exec.mode == "ssh") — see docs/rag.md.
+    terraform_dir: str | None = None
+    # Which cloud CLI grammar cloud_cli (the tool) speaks — see
+    # app/agent/tools/cloud_providers.py. Only "az" is actually implemented
+    # today; a tenants.yaml requesting an unimplemented provider fails
+    # explicitly at load time rather than silently falling back.
+    cloud_provider: Literal["az"] = "az"
     tools_enabled: list[str] = Field(default_factory=list)
     domain_notes: str = ""
 

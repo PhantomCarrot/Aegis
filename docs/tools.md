@@ -54,6 +54,12 @@ It's not just a matter of which schemas get sent to the LLM: the agent loop (`ap
 
 Displayed in the UI's **⚙️ Settings** panel: a list of tools with a toggle per tool (feeds `enabledTools`) and each tool's description underneath (`ToolsPanel.tsx` reads `schema.function.description` — the raw JSON schema itself isn't rendered in the UI, use `GET /api/tools` directly if you need it).
 
+## Cloud CLI providers
+
+`cloud_cli` is one LLM-facing tool name regardless of which cloud a tenant is on — which CLI grammar actually answers a call is resolved per tenant from `tenant.cloud_provider` (`config/tenants.yaml`), via `get_cloud_provider()` in `app/agent/tools/cloud_providers.py`. This mirrors `app/stream/providers.py`'s dispatch for LLM providers exactly: a flat `if/elif` on the config field, each branch delegating to a sibling module that owns everything specific to that CLI's own grammar (binary name, allowed read-only verbs, how a command is built).
+
+**Azure (`az`) is the only provider actually implemented and tested today** (`app/agent/tools/azure_cli.py`) — `cloud_provider` defaults to `"az"`, so nothing changes for an existing tenant that never sets it. AWS/GCP are **not implemented**: `tenant.cloud_provider` is a `Literal["az"]` in the schema, so a `tenants.yaml` requesting `aws` or `gcp` fails explicitly at load/hot-reload time (a clear config error) rather than silently falling back to Azure or doing nothing. Adding a real provider is a new flat module (its own `validate_action`/`build_command` — AWS's compound verbs like `describe-instances`/`list-buckets` don't fit Azure's exact-match `list/show/get/describe` set, so each provider validates its own grammar, never a shared one) plus one new branch in `cloud_providers.py` — no changes to `cloud_cli.py` itself or to the tool's LLM-facing interface.
+
 ## Model selection
 
 `GET /api/llm/models` is provider-aware — for `ollama`/`lmstudio` tenants it queries the provider's live models endpoint (`/api/tags`, `/v1/models`); for `airllm` it returns the single model fixed in that tenant's config, since there's nothing to discover at runtime. See [`llm-providers.md`](llm-providers.md) for the full picture (multiple LLM backends, not just Ollama). The frontend uses it to populate the model dropdown in the Settings panel; the chosen model is sent in the body of `/api/chat` (`model`, see `app/routers/chat.py`). If the target is unreachable, the endpoint responds `200` with `models: []` and an `error` field — no 500, so the UI can show a clear state instead of crashing.

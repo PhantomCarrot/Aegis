@@ -102,6 +102,20 @@ def test_ssh_mode_without_ssh_block_raises(tmp_path):
         registry.get("demo")
 
 
+def test_unknown_cloud_provider_raises(tmp_path):
+    bad = tmp_path / "tenants.yaml"
+    bad.write_text(
+        "default_tenant: demo\n"
+        "tenants:\n"
+        "  demo:\n"
+        "    name: Demo\n"
+        "    cloud_provider: aws\n"
+    )
+    registry = TenantRegistry(global_path=tmp_path / "absent.yaml", tenants_path=bad)
+    with pytest.raises(TenantsConfigError, match="cloud_provider"):
+        registry.get("demo")
+
+
 def test_kubeconfig_dir_defaults_are_tenant_scoped_not_shared(config_dir, tmp_path):
     """
     Two tenants that don't specify kubeconfig_dir must NEVER share the same

@@ -1,21 +1,21 @@
 """
 cloud_cli — queries cloud resources, read-only only.
 
-V1 supports Azure (the `az` CLI) — it's the only wired provider, but
-nothing about this tool's shape is specific to it (generic
-resource_type/action/args); adding AWS/GCP would follow the same pattern
-without changing the interface exposed to the LLM. Always "safe": the tool
-itself refuses any action that isn't list/show/get/describe, no guardrail
-needed.
+The LLM-facing tool name/interface stays stable regardless of provider —
+which cloud CLI grammar actually answers a call is resolved per tenant via
+app/agent/tools/cloud_providers.py (tenant.cloud_provider), same dispatch
+pattern as app/stream/providers.py for LLM providers. Only Azure (az CLI)
+is wired today — see docs/tools.md. Always "safe": the tool itself refuses
+any action the provider doesn't allow (list/show/get/describe for Azure),
+no guardrail needed.
 """
 from __future__ import annotations
 
 import json
-import shlex
 
+from app.agent.tools import azure_cli
+from app.agent.tools.cloud_providers import get_cloud_provider
 from app.agent.tools.types import Tool, ToolContext
-
-_ALLOWED_ACTIONS = {"list", "show", "get", "describe"}
 
 
 async def _run_cloud_cli(args: dict, ctx: ToolContext) -> dict:
@@ -24,16 +24,15 @@ async def _run_cloud_cli(args: dict, ctx: ToolContext) -> dict:
         return {"error": "cloud_cli requires 'resource_type'"}
 
     action = (args.get("action") or "list").strip()
-    if action not in _ALLOWED_ACTIONS:
-        return {"error": f"Action '{action}' not allowed — read-only (list/show/get/describe)"}
+    provider = get_cloud_provider(ctx.tenant)
+    error = provider.validate_action(action)
+    if error:
+        return {"error": error}
 
     extra: dict = args.get("args") or {}
     fmt = args.get("output_format", "table")
 
-    cmd = ["az"] + shlex.split(resource_type) + [action]
-    for k, v in extra.items():
-        cmd += [str(k), str(v)]
-    cmd += ["-o", fmt]
+    cmd = provider.build_command(resource_type, action, extra, fmt)
 
     result = await ctx.executor.run(cmd, timeout=60)
     output: dict = {
@@ -54,12 +53,13 @@ async def _run_cloud_cli(args: dict, ctx: ToolContext) -> dict:
 
 CLOUD_CLI_TOOL = Tool(
     name="cloud_cli",
-    description=(
-        "Queries cloud resources — Azure (az CLI) in V1. Read-only: "
-        "list/show/get/describe only. Examples: resource_type='keyvault secret', "
-        "action='list', args={'--vault-name': 'my-kv'} ; resource_type='aks', action='list' ; "
-        "resource_type='storage account', action='list'."
-    ),
+    # Static for V1 (azure_cli.TOOL_DESCRIPTION, not built per-tenant): the
+    # only implemented provider today is Azure, so this stays accurate for
+    # every tenant that can actually pass config validation. Making it
+    # dynamic per-tenant would need threading `tenant` into
+    # tool_to_ollama_schema() at both its call sites — not worth doing
+    # ahead of a second provider that doesn't exist yet.
+    description=azure_cli.TOOL_DESCRIPTION,
     parameters={
         "type": "object",
         "properties": {

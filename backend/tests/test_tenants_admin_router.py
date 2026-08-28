@@ -120,6 +120,28 @@ def test_update_then_get_reflects_the_change(client):
     assert refetched["domain_notes"] == "updated"
 
 
+def test_update_round_trips_terraform_dir_and_cloud_provider(client):
+    """
+    Regression test for a real bug caught while planning this change:
+    TenantWriteRequest didn't declare these fields, and update_tenant()
+    replaces the tenant's YAML node wholesale (body.model_dump(exclude_none=True))
+    — so a hand-set terraform_dir/cloud_provider would silently vanish on
+    the very next save through the admin UI. See app/routers/tenants.py.
+    """
+    r = client.put(
+        "/api/tenants/acme-corp",
+        headers=AUTH,
+        json={"name": "Acme Corp", "terraform_dir": "~/infra/terraform", "cloud_provider": "az"},
+    )
+    assert r.status_code == 200
+    assert r.json()["terraform_dir"] == "~/infra/terraform"
+    assert r.json()["cloud_provider"] == "az"
+
+    refetched = client.get("/api/tenants/acme-corp", headers=AUTH).json()
+    assert refetched["terraform_dir"] == "~/infra/terraform"
+    assert refetched["cloud_provider"] == "az"
+
+
 def test_update_unknown_tenant_is_404(client):
     r = client.put("/api/tenants/does-not-exist", headers=AUTH, json={"name": "X"})
     assert r.status_code == 404

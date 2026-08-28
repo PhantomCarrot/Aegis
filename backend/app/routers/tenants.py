@@ -37,6 +37,8 @@ class TenantWriteRequest(BaseModel):
     llm: LLMConfig | None = None
     exec: ExecConfig | None = None
     kubeconfig_dir: str = ""
+    terraform_dir: str | None = None
+    cloud_provider: str = "az"
     tools_enabled: list[str] = Field(default_factory=list)
     domain_notes: str = ""
 
