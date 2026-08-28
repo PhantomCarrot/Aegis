@@ -11,7 +11,7 @@ from app.config.schema import TenantConfig
 from app.config.tenants import resolve_tenant
 from app.exec.factory import describe_executor, get_executor
 from app.logging_config import get_audit_logger
-from app.rag import docs_gen
+from app.rag import docs_gen, terraform_gen
 from app.rag.embeddings import EmbeddingError
 from app.rag.indexer import index_text
 from app.rag.store import get_store
@@ -19,41 +19,55 @@ from app.security.auth import RequireAuth
 
 router = APIRouter(prefix="/api/rag", tags=["rag"], dependencies=[RequireAuth])
 
-_OVERVIEW_SOURCE_PATH = "cluster-overview.md"
+_KUBECTL_SOURCE_PATH = "cluster-overview.md"
+_TERRAFORM_SOURCE_PATH = "terraform-state.md"
 
 _audit = get_audit_logger()
 
 
 @router.post("/generate")
 async def generate(tenant: Annotated[TenantConfig, Depends(resolve_tenant)]) -> dict:
-    """Scrapes the active tenant's cluster, writes a Markdown doc, and indexes it."""
+    """
+    Scrapes the active tenant's infra and indexes it — kubectl always,
+    plus Terraform state if `tenant.terraform_dir` is configured. Each
+    scrape becomes its own document (distinct source_path), so
+    GET /api/rag/documents lists them separately.
+    """
     started = time.monotonic()
     ctx = ToolContext(tenant=tenant, executor=get_executor(tenant), exec_target=describe_executor(tenant))
-    markdown = await docs_gen.generate_overview(ctx)
+    store = get_store()
 
+    to_index = [(_KUBECTL_SOURCE_PATH, await docs_gen.generate_overview(ctx))]
+    terraform_markdown = await terraform_gen.generate_terraform_overview(ctx)
+    if terraform_markdown is not None:
+        to_index.append((_TERRAFORM_SOURCE_PATH, terraform_markdown))
+
+    documents = []
     try:
-        chunks_indexed, generated_at = await index_text(tenant, get_store(), _OVERVIEW_SOURCE_PATH, markdown)
+        for source_path, markdown in to_index:
+            chunks_indexed, generated_at = await index_text(tenant, store, source_path, markdown)
+            documents.append({
+                "source_path": source_path,
+                "chunks_indexed": chunks_indexed,
+                "chars": len(markdown),
+                "generated_at": generated_at,
+            })
     except EmbeddingError as e:
         duration_ms = round((time.monotonic() - started) * 1000)
         _audit.info(
-            "rag_generate tenant=%s ok=%s chunks_indexed=0 duration_ms=%d",
+            "rag_generate tenant=%s ok=%s documents=0 chunks_indexed=0 duration_ms=%d",
             tenant.id, False, duration_ms,
         )
         return {"ok": False, "error": str(e)}
 
     duration_ms = round((time.monotonic() - started) * 1000)
+    total_chunks = sum(d["chunks_indexed"] for d in documents)
     _audit.info(
-        "rag_generate tenant=%s ok=%s chunks_indexed=%d duration_ms=%d",
-        tenant.id, True, chunks_indexed, duration_ms,
+        "rag_generate tenant=%s ok=%s documents=%d chunks_indexed=%d duration_ms=%d",
+        tenant.id, True, len(documents), total_chunks, duration_ms,
     )
 
-    return {
-        "ok": True,
-        "source_path": _OVERVIEW_SOURCE_PATH,
-        "chunks_indexed": chunks_indexed,
-        "chars": len(markdown),
-        "generated_at": generated_at,
-    }
+    return {"ok": True, "documents": documents, "generated_at": documents[-1]["generated_at"]}
 
 
 @router.get("/status")

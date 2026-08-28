@@ -1,8 +1,10 @@
 """
 "Living" documentation generation by directly scraping the infra — this is
-what feeds the RAG index (no need for pre-existing external docs). V1 is
-limited to basic kubectl scraping; Terraform and LLM narrative generation
-are deferred (V1.1). See docs/rag.md.
+what feeds the RAG index (no need for pre-existing external docs). This
+module handles kubectl; see the sibling terraform_gen.py for Terraform
+state, invoked alongside this one from the same POST /api/rag/generate
+call (app/routers/rag.py). LLM-narrated doc generation isn't implemented
+yet — see docs/rag.md.
 """
 from __future__ import annotations
 

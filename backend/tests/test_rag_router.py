@@ -15,6 +15,9 @@ default_tenant: demo
 tenants:
   demo:
     name: "Demo"
+  demo-tf:
+    name: "Demo with Terraform"
+    terraform_dir: "~/infra/terraform"
 """
 
 
@@ -64,12 +67,14 @@ def test_generate_scrapes_indexes_and_updates_status(client, monkeypatch):
     assert r.status_code == 200
     body = r.json()
     assert body["ok"] is True
-    assert body["chunks_indexed"] >= 1
+    assert len(body["documents"]) == 1  # this tenant has no terraform_dir — kubectl only
+    assert body["documents"][0]["source_path"] == "cluster-overview.md"
+    assert body["documents"][0]["chunks_indexed"] >= 1
     assert body["generated_at"]  # ISO timestamp, non-empty
 
     status = client.get("/api/rag/status", headers=AUTH).json()
     assert status["ready"] is True
-    assert status["points_count"] == body["chunks_indexed"]
+    assert status["points_count"] == body["documents"][0]["chunks_indexed"]
     assert status["generated_at"] == body["generated_at"]
 
 
@@ -89,6 +94,56 @@ def test_generate_reports_embedding_failure_without_crashing(client, monkeypatch
     r = client.post("/api/rag/generate", headers=AUTH)
     assert r.status_code == 200
     assert r.json()["ok"] is False
+
+
+TERRAFORM_JSON_FIXTURE = """
+{
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "azurerm_resource_group.main",
+          "mode": "managed",
+          "type": "azurerm_resource_group",
+          "provider_name": "registry.terraform.io/hashicorp/azurerm",
+          "values": {"name": "demo-rg", "location": "westeurope"}
+        }
+      ]
+    }
+  }
+}
+"""
+
+
+def test_generate_also_scrapes_terraform_when_configured(client, monkeypatch):
+    monkeypatch.setattr(indexer_module, "embed_texts", _fake_embed_texts)
+
+    async def fake_run(self, command, **kwargs):
+        # terraform_gen.py builds a shell STRING ("cd ... && terraform show
+        # -json"), unlike every other tool here which passes a list — a
+        # fake_run assuming a list (" ".join(command)) would silently join
+        # individual characters instead of raising, a real trap.
+        if isinstance(command, str) and "terraform show -json" in command:
+            return ExecResult(stdout=TERRAFORM_JSON_FIXTURE, stderr="", returncode=0, command=command)
+        display = " ".join(command) if isinstance(command, list) else command
+        return ExecResult(stdout="fake output", stderr="", returncode=0, command=display)
+
+    monkeypatch.setattr(LocalExecutor, "run", fake_run)
+
+    r = client.post("/api/rag/generate", headers={**AUTH, "X-Tenant-Id": "demo-tf"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["ok"] is True
+    assert len(body["documents"]) == 2
+    by_path = {d["source_path"]: d for d in body["documents"]}
+    assert "cluster-overview.md" in by_path
+    assert "terraform-state.md" in by_path
+    assert by_path["terraform-state.md"]["chunks_indexed"] >= 1
+
+    documents = client.get("/api/rag/documents", headers={**AUTH, "X-Tenant-Id": "demo-tf"}).json()["documents"]
+    assert {d["source_path"] for d in documents} == {"cluster-overview.md", "terraform-state.md"}
+    tf_doc = next(d for d in documents if d["source_path"] == "terraform-state.md")
+    assert any("azurerm_resource_group.main" in c["text"] for c in tf_doc["chunks"])
 
 
 def test_documents_empty_before_generation(client):

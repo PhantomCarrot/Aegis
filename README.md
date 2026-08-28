@@ -107,7 +107,7 @@ Every doc opens with a short "what this is / why it exists" before the detail �
 
 ## Known gaps
 
-Dense-only RAG search (no hybrid search or reranking yet), kubectl is the only RAG source (no Terraform scraper or LLM-narrated docs), and no object storage / streaming / observability / CI-CD tools yet — see [`docs/rag.md`](docs/rag.md#not-yet-implemented) for the full list. [`docs/adr/`](docs/adr/) has the reasoning behind the bigger design calls (why a Python backend + Next.js frontend, why the confirmation flow rides on the AI SDK's native approval mechanism, ...).
+No cross-encoder reranking yet on top of hybrid RAG search, no LLM-narrated docs (both scrapers produce mechanically-formatted Markdown), and no object storage / streaming / observability / CI-CD tools yet — see [`docs/rag.md`](docs/rag.md#not-yet-implemented) for the full list. [`docs/adr/`](docs/adr/) has the reasoning behind the bigger design calls (why a Python backend + Next.js frontend, why the confirmation flow rides on the AI SDK's native approval mechanism, ...).
 
 ## Contributing
 

@@ -52,7 +52,12 @@ export function RagStatusPanel({ activeTenantId }: { activeTenantId: string | nu
       .then((r) => r.json())
       .then((body) => {
         if (body.ok) {
-          setMessage(`✓ ${body.chunks_indexed} chunks indexed`);
+          // generate() indexes one document per source (kubectl always,
+          // Terraform state too if the tenant has terraform_dir set) —
+          // see docs/rag.md.
+          const total = body.documents.reduce((sum: number, d: { chunks_indexed: number }) => sum + d.chunks_indexed, 0);
+          const label = body.documents.length > 1 ? `${body.documents.length} documents` : "1 document";
+          setMessage(`✓ ${total} chunks indexed (${label})`);
           loadStatus();
         } else {
           setMessage(`⚠ ${body.error ?? "generation failed"}`);
