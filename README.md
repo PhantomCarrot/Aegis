@@ -1,4 +1,8 @@
-# Aegis
+<p align="center">
+  <img src="docs/assets/aegis-mark.svg" width="96" height="96" alt="Aegis">
+</p>
+
+<h1 align="center">Aegis</h1>
 
 **A private, multi-tenant conversational operations console — for teams who manage infrastructure across several clients or environments, and don't want their command history or secrets going through someone else's LLM.**
 
@@ -7,7 +11,7 @@
 ![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688?logo=fastapi&logoColor=white)
 ![LLM](https://img.shields.io/badge/LLM-Ollama%20%7C%20LM%20Studio%20%7C%20AirLLM-2b2b2b)
 ![Qdrant](https://img.shields.io/badge/vector%20store-Qdrant-dc244c)
-![Tests](https://img.shields.io/badge/backend%20tests-235%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/backend%20tests-259%20passing-brightgreen)
 
 Aegis is a DevOps copilot, not an autonomous agent: you ask it things in plain language ("what's crash-looping in the dev namespace"), and it drives the CLI tools you already have installed — kubectl, ArgoCD, cloud CLIs — to diagnose and fix real infrastructure. The LLM decides what to run, but it never touches your infra directly and never sees a secret in the clear: a separate execution layer runs every command, and an anonymizer redacts anything sensitive before the result reaches the model.
 
