@@ -30,6 +30,8 @@ Prerequisite: Docker — nothing else, Node/npm included (the frontend runs in i
 
 That's it — one command, `http://localhost:3000` when it's done. It copies the example configs (only the ones that don't already exist — never overwrites a real setup) and brings up Qdrant, the backend, and the frontend. The `demo` tenant is preconfigured and ready to talk to. Point it at your own cluster from **⚙️ Settings → 🗂️ Tenant administration** in the sidebar, or by editing `config/tenants.yaml` directly (see [`docs/multi-tenant.md`](docs/multi-tenant.md)).
 
+Using `exec.mode: ssh` with a key/certificate path outside `~/.ssh` (e.g. a short-lived cert from `az ssh config`)? The container can't see it — run the backend directly on the host instead (below) for that tenant. See [`docs/execution-model.md`](docs/execution-model.md#the-two-modes).
+
 Optional: [Ollama](https://ollama.com) running locally is auto-detected (`localhost:11434`) — needed for the chat LLM and RAG embeddings. For RAG specifically, pull the embedding model first: `ollama pull nomic-embed-text`.
 
 <details>
