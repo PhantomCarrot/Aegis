@@ -121,4 +121,4 @@ Issues and PRs welcome — the docs above are written to make that possible with
 
 ## License
 
-To be decided before publication.
+[Apache License 2.0](LICENSE).
