@@ -2,13 +2,16 @@
 # Installation-wide defaults, overridable field by field by each tenant in
 # tenants.yaml — see docs/multi-tenant.md.
 
-ollama:
-  # host.docker.internal: reaches Ollama running on your machine from
-  # inside the backend's Docker container (the default via
-  # ./quickstart.sh / docker-compose.yml). Running the backend directly on
-  # the host instead (see README.md "Developing locally, without Docker")?
-  # Change this to http://localhost:11434.
-  url: "http://host.docker.internal:11434"
+# ollama.url deliberately left unset here: it already resolves correctly
+# in both quickstart modes on its own, via the OLLAMA_URL env var —
+# host.docker.internal under ./quickstart.sh (set in docker-compose.yml),
+# localhost under ./quickstart-local.sh (unset there, same default the
+# Python code falls back to). Only set it below if you need something
+# neither of those covers (Ollama on a different host/port, for example) —
+# whatever you put here always wins over the env var, and then you're back
+# to updating it by hand if you switch modes.
+# ollama:
+#   url: "http://localhost:11434"
 
 exec:
   mode: local # local | ssh — see docs/execution-model.md

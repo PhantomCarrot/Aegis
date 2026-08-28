@@ -12,9 +12,21 @@ one setting.
 """
 from __future__ import annotations
 
+import os
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+
+def _default_ollama_url() -> str:
+    # Same env var (and same fallback) as DEFAULT_OLLAMA_URL in
+    # app/stream/ollama_provider.py — docker-compose.yml sets OLLAMA_URL to
+    # host.docker.internal for the Docker quickstart, and leaves it unset
+    # for quickstart-local.sh, so this resolves correctly in both without
+    # global.yaml needing to hardcode either value. Only relevant when
+    # global.yaml/tenants.yaml doesn't set ollama.url explicitly — an
+    # explicit value always wins (see app/config/tenants.py deep_merge).
+    return os.getenv("OLLAMA_URL", "http://localhost:11434")
 
 
 class OllamaConfig(BaseModel):
@@ -23,7 +35,7 @@ class OllamaConfig(BaseModel):
     # Always used for RAG embeddings (nomic-embed-text via /api/embed, see
     # docs/rag.md), regardless of which chat provider `llm.provider` picks
     # below — embeddings aren't pluggable yet, only chat is.
-    url: str = "http://localhost:11434"
+    url: str = Field(default_factory=_default_ollama_url)
 
 
 class LMStudioConfig(BaseModel):
