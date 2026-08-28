@@ -20,6 +20,15 @@ services:
       QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
     volumes:
       - ./config:/app/config:ro
+      # Optional — needed only for a tenant with exec.mode: ssh whose
+      # key/certificate lives outside this repo. Uncomment and point at a
+      # STABLE path (e.g. your real ~/.ssh); the container path just has
+      # to match whatever key_path/certificate_path you put in
+      # tenants.yaml. This does NOT work for a short-lived cert from
+      # `az ssh config` (its path changes every time it's regenerated,
+      # under a random macOS temp dir) — use quickstart-local.sh for that
+      # tenant instead. See docs/execution-model.md#docker-and-ssh-keys.
+      # - ${HOME}/.ssh:/root/.ssh:ro
     depends_on:
       - qdrant
     extra_hosts:

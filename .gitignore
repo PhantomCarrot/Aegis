@@ -20,6 +20,9 @@ frontend/.env.local
 # Data
 qdrant_storage/
 
+# quickstart-local.sh state
+/.aegis-local.pids
+
 # OS / editors
 .DS_Store
 .vscode/

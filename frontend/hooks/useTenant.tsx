@@ -18,12 +18,16 @@ type FetchResult =
 async function fetchTenantsList(): Promise<FetchResult> {
   try {
     const res = await apiFetch("/api/tenants");
-    const body: TenantsResponse = await res.json();
+    // `detail` covers FastAPI's own error shape (auth failures, 5xx) — the
+    // fetch can fail before ever reaching the handler that produces `error`,
+    // and without this a backend misconfiguration (e.g. AEGIS_BACKEND_TOKENS
+    // unset) was misreported as "no tenant configured", which it isn't.
+    const body: TenantsResponse & { detail?: string } = await res.json();
 
-    if (!res.ok || body.error || body.tenants.length === 0) {
+    if (!res.ok || body.error || body.detail || body.tenants.length === 0) {
       return {
         ok: false,
-        message: body.error ?? "No tenant configured (config/tenants.yaml missing or empty).",
+        message: body.error ?? body.detail ?? "No tenant configured (config/tenants.yaml missing or empty).",
       };
     }
     return { ok: true, tenants: body.tenants, defaultTenant: body.default_tenant };

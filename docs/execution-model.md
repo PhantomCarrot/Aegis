@@ -29,9 +29,33 @@ tenants:
 
 `certificate_path` is for setups using short-lived certificate-based auth instead of a static key — e.g. Azure AD via `az ssh config`, or a Vault SSH secrets engine. The certificate is only checked at connection time, not per command, so a session opened before the certificate expires stays valid; refreshing the file in place (same path, new content, however that's done outside Aegis) is picked up on the next reconnect, no restart needed.
 
-`key_path`/`certificate_path`/`known_hosts_path` are read from **whichever machine actually runs the backend process** — same rule as `kubeconfig_dir` below. Running the backend via the Docker quickstart (`./quickstart.sh`)? Those paths are resolved *inside the container*, which only sees `./config` — not your `~/.ssh`, and definitely not an OS-managed temp directory like the one `az ssh config` writes ephemeral key material to on some machines/extension versions (see the Azure section below). A tenant whose paths live outside what the container can see fails to connect entirely — every tool that tenant has enabled correctly shows as unavailable in the UI (see [`tools.md`](tools.md#inspecting-tool-configuration)), because the connection genuinely doesn't work there, not because of a bug in the check. If that's your setup, run the backend directly on the host instead (see README.md's "Developing locally, without Docker") rather than trying to make the container see paths that move around.
+`key_path`/`certificate_path`/`known_hosts_path` are read from **whichever machine actually runs the backend process** — same rule as `kubeconfig_dir` below. Running the backend via the Docker quickstart (`./quickstart.sh`)? Those paths are resolved *inside the container*, which by default only sees `./config` — not your `~/.ssh`, and definitely not an OS-managed temp directory like the one `az ssh config` writes ephemeral key material to on some machines/extension versions (see the Azure section below, and [Docker and SSH keys](#docker-and-ssh-keys) just below for the fix). A tenant whose paths live outside what the container can see fails to connect entirely — every tool that tenant has enabled correctly shows as unavailable in the UI (see [`tools.md`](tools.md#inspecting-tool-configuration)), because the connection genuinely doesn't work there, not because of a bug in the check.
 
 `exec.mode` can be set in `config/global.yaml` (a default for all tenants) and overridden per tenant in `config/tenants.yaml` — see [`multi-tenant.md`](multi-tenant.md).
+
+### Docker and SSH keys
+
+Two cases, and they need different fixes:
+
+- **A static key file** (a normal `ssh-keygen` keypair, sitting at a fixed path like `~/.ssh/aegis_acme-corp`) — the container just needs to see it. Uncomment the SSH volume line in `docker-compose.yml`'s `backend` service, pointed at wherever the key actually lives, and make sure `key_path`/`certificate_path`/`known_hosts_path` in `tenants.yaml` use the **container-side** path, not the host one:
+
+  ```yaml
+  # docker-compose.yml
+  volumes:
+    - ${HOME}/.ssh:/root/.ssh:ro
+  ```
+
+  ```yaml
+  # config/tenants.yaml
+  tenants:
+    acme-corp:
+      exec:
+        mode: ssh
+        ssh:
+          key_path: "/root/.ssh/aegis_acme-corp"  # container path, not ~/.ssh/...
+  ```
+
+- **A short-lived certificate** from `az ssh config` (or equivalent) — its path lives under a temp directory the OS regenerates on every run (`/var/folders/.../T/az_ssh_config/...` on macOS), so there's no stable path to mount. Run the backend on the host instead for that tenant: `./quickstart-local.sh` starts both backend and frontend as plain host processes (Qdrant still runs in Docker) — see the README's "Two ways to run it" for when to reach for it over `./quickstart.sh`.
 
 ## SSH exec — connecting to a real box, by environment
 

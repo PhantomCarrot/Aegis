@@ -26,17 +26,19 @@ Aegis is a DevOps copilot, not an autonomous agent: you ask it things in plain l
 
 ## Quickstart
 
+Optional either way: [Ollama](https://ollama.com) running locally is auto-detected (`localhost:11434`) — needed for the chat LLM and RAG embeddings. For RAG specifically, pull the embedding model first: `ollama pull nomic-embed-text`.
+
+### Option A — Docker (recommended to start)
+
 Prerequisite: Docker — nothing else, Node/npm included (the frontend runs in its own container too).
 
 ```bash
 ./quickstart.sh
 ```
 
-That's it — one command, `http://localhost:3000` when it's done. It copies the example configs (only the ones that don't already exist — never overwrites a real setup) and brings up Qdrant, the backend, and the frontend. The `demo` tenant is preconfigured and ready to talk to. Point it at your own cluster from **⚙️ Settings → 🗂️ Tenant administration** in the sidebar, or by editing `config/tenants.yaml` directly (see [`docs/multi-tenant.md`](docs/multi-tenant.md)).
+One command, `http://localhost:3000` when it's done. It copies the example configs (only the ones that don't already exist — never overwrites a real setup) and brings up Qdrant, the backend, and the frontend, all in Docker. The `demo` tenant is preconfigured and ready to talk to. Point it at your own cluster from **⚙️ Settings → 🗂️ Tenant administration** in the sidebar, or by editing `config/tenants.yaml` directly (see [`docs/multi-tenant.md`](docs/multi-tenant.md)).
 
-Using `exec.mode: ssh` with a key/certificate path outside `~/.ssh` (e.g. a short-lived cert from `az ssh config`)? The container can't see it — run the backend directly on the host instead (below) for that tenant. See [`docs/execution-model.md`](docs/execution-model.md#the-two-modes).
-
-Optional: [Ollama](https://ollama.com) running locally is auto-detected (`localhost:11434`) — needed for the chat LLM and RAG embeddings. For RAG specifically, pull the embedding model first: `ollama pull nomic-embed-text`.
+The one thing this mode can't do on its own: reach an SSH key that lives outside the repo (`exec.mode: ssh` in a tenant's config). By default the container only sees `./config` — mount the key in yourself (a couple of lines in `docker-compose.yml`) or, if it's a short-lived certificate like `az ssh config` produces, use Option B instead for that tenant. See [`docs/execution-model.md#docker-and-ssh-keys`](docs/execution-model.md#docker-and-ssh-keys).
 
 <details>
 <summary>What the script does, step by step (or run it yourself without the script)</summary>
@@ -51,7 +53,17 @@ docker compose up -d --build   # Qdrant + backend + frontend
 
 </details>
 
-### Developing locally, without Docker
+### Option B — Local, no Docker for backend/frontend
+
+Backend and frontend run as plain host processes instead (Qdrant still needs a real vector DB, so it stays in Docker). Reach for this when a tenant's SSH key/certificate path isn't something you can hand to a container — most commonly a short-lived cert from `az ssh config`, whose path changes every time it's regenerated.
+
+```bash
+./quickstart-local.sh          # start — same one-shot config copying as quickstart.sh
+./quickstart-local.sh stop     # stop both processes
+```
+
+<details>
+<summary>What the script does, step by step (or run it yourself without the script)</summary>
 
 Backend:
 
@@ -71,6 +83,8 @@ cp .env.example .env.local
 npm install
 npm run dev                 # → http://localhost:3000
 ```
+
+</details>
 
 ## How it fits together
 
