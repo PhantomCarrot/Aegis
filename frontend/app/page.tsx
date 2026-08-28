@@ -17,7 +17,7 @@ import { Panel } from "@/components/ui/Panel";
 import { Segmented } from "@/components/ui/Segmented";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTenant } from "@/hooks/useTenant";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, setStoredModel } from "@/lib/api";
 
 type PingState =
   | { status: "loading" }
@@ -65,9 +65,14 @@ export default function Home() {
 
   // Switching tenant invalidates the chosen model and any tool restriction:
   // each tenant has its own Ollama and its own set of allowed tools (see
-  // docs/multi-tenant.md, docs/tools.md). The reset goes through a
-  // microtask (not a synchronous setState in the effect body) — same
-  // convention as TenantProvider/ChatPanel elsewhere in this project.
+  // docs/multi-tenant.md, docs/tools.md). ModelSelector re-picks a model
+  // for the new tenant itself — preferring what was last picked *for that
+  // tenant* (localStorage, see lib/api.ts) — once its own model-list fetch
+  // resolves; seeding a guess here first would race that fetch's stale
+  // closure over `value` (deliberately excluded from its effect deps) and
+  // get overwritten. The reset goes through a microtask (not a
+  // synchronous setState in the effect body) — same convention as
+  // TenantProvider/ChatPanel elsewhere in this project.
   useEffect(() => {
     if (activeTenantId === null) return;
     Promise.resolve().then(() => {
@@ -75,6 +80,11 @@ export default function Home() {
       setEnabledTools(null);
     });
   }, [activeTenantId]);
+
+  const handleModelChange = (nextModel: string) => {
+    setModel(nextModel);
+    if (activeTenantId) setStoredModel(activeTenantId, nextModel);
+  };
 
   return (
     <div className="flex h-screen flex-col bg-aegis-bg font-sans text-aegis-text">
@@ -118,7 +128,7 @@ export default function Home() {
         <CommandRail
           settingsContent={
             <>
-              <ModelSelector activeTenantId={activeTenantId} value={model} onChange={setModel} />
+              <ModelSelector activeTenantId={activeTenantId} value={model} onChange={handleModelChange} />
 
               <Panel eyebrow="Safety" category="settings" collapsible={false}>
                 <SafetyModeBadge value={safetyMode} onChange={setSafetyMode} />

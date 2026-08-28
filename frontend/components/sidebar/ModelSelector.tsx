@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Panel } from "@/components/ui/Panel";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, getStoredModel } from "@/lib/api";
 
 type Provider = "ollama" | "lmstudio" | "airllm";
 
@@ -33,6 +33,13 @@ const PROVIDER_LABEL: Record<Provider, string> = {
  * checkpoint on demand isn't a "just pick from a dropdown" operation given
  * the cost) — the select is disabled with that one option, not hidden, so
  * it's still clear what's actually running.
+ *
+ * The choice persists per tenant (localStorage, see lib/api.ts) — restored
+ * here once the model list for the new tenant is back, not seeded by the
+ * parent: `value` is deliberately excluded from this component's fetch
+ * effect deps (see below), so a parent-seeded guess would race the fetch
+ * and lose to its fallback logic. `onChange` (owned by the parent,
+ * app/page.tsx) is what actually writes the persisted value.
  */
 export function ModelSelector({
   activeTenantId,
@@ -62,9 +69,13 @@ export function ModelSelector({
         setError(body.error ?? null);
         setModels(body.models);
         // The active model belongs to a different tenant/provider, or none
-        // has been chosen yet: fall back to the first one available.
+        // has been chosen yet: prefer what was last picked *for this
+        // tenant* (persists across reloads, see lib/api.ts), falling back
+        // to the first one available if there's no stored pick or it's no
+        // longer offered.
         if (body.models.length > 0 && (!value || !body.models.includes(value))) {
-          onChange(body.models[0]);
+          const stored = activeTenantId ? getStoredModel(activeTenantId) : null;
+          onChange(stored && body.models.includes(stored) ? stored : body.models[0]);
         }
       })
       .catch((err) => setError(String(err)));

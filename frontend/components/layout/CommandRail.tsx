@@ -35,7 +35,7 @@ export function CommandRail({
   }
 
   return (
-    <div className="flex h-full min-h-0 w-72 flex-shrink-0 flex-col border-r border-aegis-border bg-aegis-surface-2">
+    <div className="flex h-full min-h-0 w-96 flex-shrink-0 flex-col border-r border-aegis-border bg-aegis-surface-2">
       <div className="flex flex-shrink-0 items-center border-b border-aegis-border">
         <button
           type="button"
