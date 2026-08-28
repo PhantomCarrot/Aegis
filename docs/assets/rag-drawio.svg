@@ -1,0 +1,115 @@
+<svg viewBox="0 0 1400 725" xmlns="http://www.w3.org/2000/svg" role="img"
+     style="color-scheme: light dark;"
+     aria-label="Aegis RAG pipeline: docs_gen.py scrapes the cluster into a Markdown doc, chunking.py splits it, dense and sparse embeddings are computed and stored in Qdrant via store.py. On a RAG-mode chat turn, the question is embedded the same two ways, store.py runs a hybrid dense+sparse search fused with RRF, anonymizer.py redacts secrets from the retrieved text, and context.py builds the cited context injected into the system prompt.">
+<title>Aegis RAG pipeline</title>
+<defs>
+<marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#0969da, #56a8ff);"/></marker>
+<marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#9a6700, #bb8f37);"/></marker>
+<marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#1b7c83, #52a5ac);"/></marker>
+<marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#8250df, #af84ff);"/></marker>
+<marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#1a7f37, #57ae70);"/></marker>
+<marker id="arrow-pink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#bf3989, #e990c7);"/></marker>
+<marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" style="fill:light-dark(#57606a, #969da6);"/></marker>
+</defs>
+<rect x="0" y="0" width="1400" height="725" style="fill:light-dark(#f6f8fa, #17191b);"/>
+<rect id="zoneGen" x="30" y="40" width="1340" height="280" rx="16" ry="16" fill="none" style="stroke:light-dark(#9a6700, #bb8f37);stroke-width:2;stroke-dasharray:8 6;"/>
+<text x="50" y="66" style="font-family:'Courier New',monospace;font-size:13px;font-weight:700;letter-spacing:0.5px;fill:light-dark(#9a6700, #bb8f37);">GENERATION + INDEXING · POST /api/rag/generate</text>
+<rect id="zoneSearch" x="30" y="350" width="1340" height="300" rx="16" ry="16" fill="none" style="stroke:light-dark(#0969da, #56a8ff);stroke-width:2;stroke-dasharray:8 6;"/>
+<text x="50" y="376" style="font-family:'Courier New',monospace;font-size:13px;font-weight:700;letter-spacing:0.5px;fill:light-dark(#0969da, #56a8ff);">SEARCH · every RAG-mode chat turn</text>
+<g id="docsGen">
+<rect x="60" y="150" width="210" height="90" rx="12" ry="12" style="fill:light-dark(#fff8c5, #221c00);stroke:light-dark(#9a6700, #bb8f37);stroke-width:1.5;"/>
+<text x="165.0" y="183.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">docs_gen.py</text>
+<text x="165.0" y="200.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">scrapes kubectl → Markdown</text>
+<text x="165.0" y="217.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">(ns · pods · deploy · svc)</text>
+</g>
+<g id="chunking">
+<rect x="340" y="150" width="210" height="90" rx="12" ry="12" style="fill:light-dark(#eaeef2, #21262d);stroke:light-dark(#57606a, #969da6);stroke-width:1.5;"/>
+<text x="445.0" y="183.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">chunking.py</text>
+<text x="445.0" y="200.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">heading breadcrumb</text>
+<text x="445.0" y="217.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">word-boundary safe cuts</text>
+</g>
+<g id="embedGen">
+<rect x="620" y="90" width="230" height="70" rx="12" ry="12" style="fill:light-dark(#f6ebff, #261d2e);stroke:light-dark(#8250df, #af84ff);stroke-width:1.5;"/>
+<text x="735.0" y="121.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">embeddings.py</text>
+<text x="735.0" y="138.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">dense — Ollama nomic-embed-text</text>
+</g>
+<g id="sparseGen">
+<rect x="620" y="220" width="230" height="70" rx="12" ry="12" style="fill:light-dark(#ffeff7, #2e1526);stroke:light-dark(#bf3989, #e990c7);stroke-width:1.5;"/>
+<text x="735.0" y="251.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">sparse_embeddings.py</text>
+<text x="735.0" y="268.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">sparse — fastembed BM25, local ONNX</text>
+</g>
+<g id="store">
+<rect x="940" y="140" width="340" height="110" rx="12" ry="12" style="fill:light-dark(#d8f6f6, #0c2525);stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.5;"/>
+<text x="1110.0" y="183.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">store.py → Qdrant</text>
+<text x="1110.0" y="200.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">dense+sparse vectors, per-tenant collection</text>
+<text x="1110.0" y="217.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">+ generated_at (freshness)</text>
+</g>
+<g id="question">
+<rect x="60" y="460" width="190" height="80" rx="12" ry="12" style="fill:light-dark(#ddf4ff, #0e222b);stroke:light-dark(#0969da, #56a8ff);stroke-width:1.5;"/>
+<text x="155.0" y="488.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">User question</text>
+<text x="155.0" y="505.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">last chat message</text>
+<text x="155.0" y="522.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">RAG mode on</text>
+</g>
+<g id="embedQ">
+<rect x="330" y="400" width="230" height="70" rx="12" ry="12" style="fill:light-dark(#f6ebff, #261d2e);stroke:light-dark(#8250df, #af84ff);stroke-width:1.5;"/>
+<text x="445.0" y="431.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">embed_query()</text>
+<text x="445.0" y="448.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">dense — same Ollama model</text>
+</g>
+<g id="sparseQ">
+<rect x="330" y="520" width="230" height="70" rx="12" ry="12" style="fill:light-dark(#ffeff7, #2e1526);stroke:light-dark(#bf3989, #e990c7);stroke-width:1.5;"/>
+<text x="445.0" y="551.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">embed_query_sparse()</text>
+<text x="445.0" y="568.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">sparse — fastembed BM25</text>
+</g>
+<g id="hybrid">
+<rect x="640" y="450" width="250" height="100" rx="12" ry="12" style="fill:light-dark(#d8f6f6, #0c2525);stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.5;"/>
+<text x="765.0" y="488.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">store.py</text>
+<text x="765.0" y="505.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">prefetch dense+sparse</text>
+<text x="765.0" y="522.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">→ RRF fusion, score_threshold</text>
+</g>
+<g id="anonymizer">
+<rect x="970" y="450" width="210" height="100" rx="12" ry="12" style="fill:light-dark(#dafbe1, #08250e);stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.5;"/>
+<text x="1075.0" y="479.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">anonymizer.py</text>
+<text x="1075.0" y="496.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">anonymize_text()</text>
+<text x="1075.0" y="513.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">same per-turn instance as</text>
+<text x="1075.0" y="530.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">tool-result redaction</text>
+</g>
+<g id="context">
+<rect x="1190" y="450" width="170" height="100" rx="12" ry="12" style="fill:light-dark(#ddf4ff, #0e222b);stroke:light-dark(#0969da, #56a8ff);stroke-width:1.5;"/>
+<text x="1275.0" y="479.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;fill:light-dark(#1f2328, #cdd0d4);">context.py</text>
+<text x="1275.0" y="496.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">build_context()</text>
+<text x="1275.0" y="513.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">citations +</text>
+<text x="1275.0" y="530.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">system prompt</text>
+</g>
+<path d="M 270.0 195.0 Q 305.0 155.0 340.0 195.0" fill="none" style="stroke:light-dark(#9a6700, #bb8f37);stroke-width:1.8;" marker-end="url(#arrow-amber)"/>
+<text x="305.0" y="147.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#9a6700, #bb8f37);">scrape</text>
+<g id="a1-badge"><circle cx="305.0" cy="129.0" r="11" style="fill:light-dark(#9a6700, #bb8f37);"/><text x="305.0" y="133.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">1</text></g>
+<path d="M 550.0 195.0 Q 585.0 120.0 620.0 125.0" fill="none" style="stroke:light-dark(#8250df, #af84ff);stroke-width:1.8;" marker-end="url(#arrow-purple)"/>
+<text x="585.0" y="112.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#8250df, #af84ff);">chunks</text>
+<g id="a2-badge"><circle cx="585.0" cy="94.0" r="11" style="fill:light-dark(#8250df, #af84ff);"/><text x="585.0" y="98.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">2</text></g>
+<path d="M 550.0 213.0 Q 585.0 204.0 620.0 255.0" fill="none" style="stroke:light-dark(#bf3989, #e990c7);stroke-width:1.8;" marker-end="url(#arrow-pink)"/>
+<text x="585.0" y="220.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#bf3989, #e990c7);">chunks</text>
+<path d="M 850.0 125.0 Q 895.0 109.0 940.0 173.0" fill="none" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.8;" marker-end="url(#arrow-teal)"/>
+<text x="895.0" y="101.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#1b7c83, #52a5ac);">dense vector</text>
+<g id="a3-badge"><circle cx="895.0" cy="83.0" r="11" style="fill:light-dark(#1b7c83, #52a5ac);"/><text x="895.0" y="87.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">3</text></g>
+<path d="M 850.0 255.0 Q 895.0 206.0 940.0 217.0" fill="none" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.8;" marker-end="url(#arrow-teal)"/>
+<text x="895.0" y="222.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#1b7c83, #52a5ac);">sparse vector</text>
+<path d="M 250.0 500.0 Q 290.0 427.5 330.0 435.0" fill="none" style="stroke:light-dark(#8250df, #af84ff);stroke-width:1.8;" marker-end="url(#arrow-purple)"/>
+<text x="290.0" y="419.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#8250df, #af84ff);">question</text>
+<g id="a4-badge"><circle cx="290.0" cy="401.5" r="11" style="fill:light-dark(#8250df, #af84ff);"/><text x="290.0" y="405.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">4</text></g>
+<path d="M 250.0 516.0 Q 290.0 505.5 330.0 555.0" fill="none" style="stroke:light-dark(#bf3989, #e990c7);stroke-width:1.8;" marker-end="url(#arrow-pink)"/>
+<text x="290.0" y="521.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#bf3989, #e990c7);">question</text>
+<path d="M 560.0 435.0 Q 600.0 417.5 640.0 480.0" fill="none" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.8;" marker-end="url(#arrow-teal)"/>
+<text x="600.0" y="409.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#1b7c83, #52a5ac);">dense query</text>
+<g id="a5-badge"><circle cx="600.0" cy="391.5" r="11" style="fill:light-dark(#1b7c83, #52a5ac);"/><text x="600.0" y="395.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">5</text></g>
+<path d="M 560.0 555.0 Q 600.0 507.5 640.0 520.0" fill="none" style="stroke:light-dark(#1b7c83, #52a5ac);stroke-width:1.8;" marker-end="url(#arrow-teal)"/>
+<text x="600.0" y="523.5" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#1b7c83, #52a5ac);">sparse query</text>
+<path d="M 890.0 500.0 Q 930.0 442.0 970.0 500.0" fill="none" style="stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.8;" marker-end="url(#arrow-green)"/>
+<text x="930.0" y="434.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#1a7f37, #57ae70);">hybrid hits</text>
+<g id="a6-badge"><circle cx="930.0" cy="416.0" r="11" style="fill:light-dark(#1a7f37, #57ae70);"/><text x="930.0" y="420.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">6</text></g>
+<path d="M 1180.0 500.0 Q 1185.0 442.0 1190.0 500.0" fill="none" style="stroke:light-dark(#0969da, #56a8ff);stroke-width:1.8;" marker-end="url(#arrow-blue)"/>
+<text x="1185.0" y="434.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;font-weight:700;fill:light-dark(#0969da, #56a8ff);">redacted text</text>
+<g id="a7-badge"><circle cx="1185.0" cy="416.0" r="11" style="fill:light-dark(#0969da, #56a8ff);"/><text x="1185.0" y="420.0" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;fill:light-dark(#f6f8fa, #17191b);">7</text></g>
+<rect x="380" y="665" width="640" height="50" rx="10" ry="10" style="fill:light-dark(#dafbe1, #08250e);stroke:light-dark(#1a7f37, #57ae70);stroke-width:1.5;"/>
+<text x="700.0" y="686" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:11.5px;font-weight:700;fill:light-dark(#1a7f37, #57ae70);">Anonymized before the LLM ever sees it</text>
+<text x="700.0" y="703" text-anchor="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:10.5px;fill:light-dark(#57606a, #969da6);">GET /api/rag/documents stays unredacted for the operator — see security-model.md</text>
+</svg>

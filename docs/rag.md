@@ -6,26 +6,9 @@ Rather than depending on pre-existing external documentation (often missing or s
 
 ## Full pipeline
 
-```mermaid
-flowchart LR
-    subgraph Generation
-        Scrape["docs_gen.py<br/>scrapes kubectl"] --> MD["Markdown<br/>cluster-overview.md"]
-    end
-    subgraph Indexing
-        MD --> Chunk["chunking.py<br/>splits by headings<br/>+ breadcrumb"]
-        Chunk --> Embed1["embeddings.py<br/>Ollama /api/embed<br/>(dense)"]
-        Chunk --> Embed1s["sparse_embeddings.py<br/>fastembed BM25<br/>(sparse)"]
-        Embed1 --> Store1["store.py<br/>Qdrant upsert<br/>(per-tenant collection)"]
-        Embed1s --> Store1
-    end
-    subgraph "Search (chat RAG mode)"
-        Q["User<br/>question"] --> Embed2["embeddings.py +<br/>sparse_embeddings.py"]
-        Embed2 --> Search["store.py<br/>hybrid search<br/>(RRF fusion)"]
-        Search --> Anon["anonymizer.py<br/>anonymize_text"]
-        Anon --> Ctx["context.py<br/>build_context<br/>+ citations"]
-        Ctx --> Prompt["injected into the<br/>system prompt"]
-    end
-```
+![Aegis RAG pipeline: docs_gen.py scrapes the cluster into a Markdown doc, chunking.py splits it, dense and sparse embeddings are computed and stored in Qdrant via store.py. On a RAG-mode chat turn, the question is embedded the same two ways, store.py runs a hybrid dense+sparse search fused with RRF, anonymizer.py redacts secrets from the retrieved text, and context.py builds the cited context injected into the system prompt.](assets/rag-drawio.svg)
+
+Two flows, each triggered independently: **generation + indexing** (top) runs once per `POST /api/rag/generate` call — scrape, chunk, embed both ways, upsert to Qdrant. **Search** (bottom) runs on every chat turn in RAG mode — embed the question, hybrid-search Qdrant, anonymize what came back, build the cited context. Neither flow touches the other except through the Qdrant collection itself.
 
 1. **Generation** (`app/rag/docs_gen.py`): scrapes kubectl (namespaces, pods, deployments, services) on the active tenant's cluster, produces a Markdown document. Kubectl is the only source today — no Terraform or LLM narrative generation yet (see [below](#not-yet-implemented)).
 2. **Chunking** (`app/rag/chunking.py`): splits by heading structure rather than a blind sliding window — each chunk is prefixed with its "breadcrumb" (e.g. `Cluster > Pods`) so the hierarchical context isn't lost once isolated. A section too long for one chunk is re-split with a sliding window whose cut points back off to the nearest space/newline (`_backoff_to_boundary`), so a chunk never starts or ends mid-word.
