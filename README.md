@@ -9,7 +9,7 @@
 ![Qdrant](https://img.shields.io/badge/vector%20store-Qdrant-dc244c)
 ![Tests](https://img.shields.io/badge/backend%20tests-235%20passing-brightgreen)
 
-Aegis isn't an autonomous "AI SRE" that fixes things on its own, and it isn't a single-cluster scanner — it's a copilot driven by a human operator, with explicit guardrails and an optional 100% local LLM. You ask it things in plain language ("what's crash-looping in the dev namespace", "list the ArgoCD apps out of sync"), it calls real tools against your real infra, and it never runs anything destructive without you saying yes first.
+Aegis is a DevOps copilot, not an autonomous agent: you ask it things in plain language ("what's crash-looping in the dev namespace"), and it drives the CLI tools you already have installed — kubectl, ArgoCD, cloud CLIs — to diagnose and fix real infrastructure. The LLM decides what to run, but it never touches your infra directly and never sees a secret in the clear: a separate execution layer runs every command, and an anonymizer redacts anything sensitive before the result reaches the model.
 
 ## Why this exists
 
